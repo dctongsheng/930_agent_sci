@@ -32,7 +32,7 @@ app.include_router(api_router, prefix="/api/v1")
 @app.get("/")
 async def root():
     """根路径"""
-    return {"message": "欢迎使用意图识别API", "version": settings.VERSION}
+    return {"message": "欢迎使用SCIAGENT API", "version": settings.VERSION}
 
 @app.get("/health")
 async def health_check():

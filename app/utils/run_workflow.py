@@ -123,8 +123,50 @@ async def plan_check(query:dict):
         return -1
     return result
 
+async def recommend_images(query:dict):
+    api_key = "app-WFwn3n3Ns274laHmM5OUIFtX"  # 替换为实际的API密钥
+    json_query = json.dumps(query,ensure_ascii=False)
+
+    try:
+        result = await run_workflow(
+            api_key=api_key,
+            inputs={"query": json_query},
+            response_mode="blocking",
+            user="abc-123"
+        )
+        print(json.dumps(result, indent=2, ensure_ascii=False))
+        print(result["data"]["outputs"])
+        return result["data"]["outputs"]
+    except Exception as e:
+        print(f"工作流执行失败: {e}")
+
+async def error_check(query:dict):
+    api_key = "app-90QxcS86RQBjj2hM36aF25fC"  # 替换为实际的API密钥
+    json_query = json.dumps(query,ensure_ascii=False)
+    print(json_query)
+    try:
+        result = await run_workflow(
+            api_key=api_key,
+            inputs={"err_info": json_query},   
+            response_mode="blocking",
+            user="abc-123"
+        )
+        print(json.dumps(result, indent=2, ensure_ascii=False))
+        print(result["data"]["outputs"])
+        return result["data"]["outputs"]
+    except Exception as e:
+        print(f"工作流执行失败: {e}")
+        return -1
+
 # 运行示例（如果直接执行此脚本）
 if __name__ == "__main__":
 #   asyncio.run(intent_detection("富集分析"))
-    from example import plan_desc
-    asyncio.run(plan_check(plan_desc))
+    #测试plan_check
+    # from example import plan_desc
+    # asyncio.run(plan_check(plan_desc))
+    #测试recommend_images
+    # from example import plan_desc_step3_ai
+    # asyncio.run(recommend_images(plan_desc_step3_ai))
+    #测试error_check
+    from example import images_error_check
+    asyncio.run(error_check(images_error_check))
