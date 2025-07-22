@@ -157,6 +157,24 @@ async def error_check(query:dict):
     except Exception as e:
         print(f"工作流执行失败: {e}")
         return -1
+    
+async def data_check(query:dict):
+    api_key = "app-H22BojPCUnbVgphRjbWu125X"  # 替换为实际的API密钥
+    json_query = json.dumps(query,ensure_ascii=False)
+    # print(json_query)
+    try:
+        result = await run_workflow(
+            api_key=api_key,
+            inputs={"data_choose": json_query},
+            response_mode="blocking",
+            user="abc-123"
+        )
+        # print(json.dumps(result, indent=2, ensure_ascii=False))
+        # print(result["data"]["outputs"])
+        return result["data"]["outputs"]
+    except Exception as e:
+        print(f"工作流执行失败: {e}")
+        return -1
 
 # 运行示例（如果直接执行此脚本）
 if __name__ == "__main__":
@@ -168,5 +186,6 @@ if __name__ == "__main__":
     # from example import plan_desc_step3_ai
     # asyncio.run(recommend_images(plan_desc_step3_ai))
     #测试error_check
-    from example import images_error_check
-    asyncio.run(error_check(images_error_check))
+    from example import images_error_check,data_test_1
+    # asyncio.run(error_check(images_error_check))
+    asyncio.run(data_check(data_test_1))

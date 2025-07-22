@@ -66,11 +66,31 @@ async def get_filled_parameters(data_choose: Dict[str, Any], query_template: str
             query=json.dumps(query_template)
         )
         # print("响应结果:", json.dumps(result, indent=2, ensure_ascii=False))
-        print(result)
+        # print(result)
 
         answer = result.get("answer", "")
-        print(answer)
-        print(type(answer))
+        # print(answer)
+        # print(type(answer))
+        return json.loads(answer)
+        
+    except Exception as e:
+        print(f"调用失败: {e}")
+        raise
+async def get_filled_parametersv2(data_choose: Dict[str, Any], query_template: str, user: str, conversation_id: str, response_mode: str) -> Dict[str, Any]:
+    api_key = "app-JLskTdT7Ugmm2zwDK3la6Ixv"
+    try:
+        # 调用异步API
+        result = await chat_with_api(
+            api_key=api_key,
+            inputs={"data_choose": data_choose}, 
+            query=json.dumps(query_template)
+        )
+        # print("响应结果:", json.dumps(result, indent=2, ensure_ascii=False))
+        # print(result)
+
+        answer = result.get("answer", "")
+        # print(answer)
+        # print(type(answer))
         return json.loads(answer)
         
     except Exception as e:
@@ -116,7 +136,18 @@ async def test_plan_generate():
     result = await plan_generate(data_choose, query_template)
     print(result)
 
+async def test_auto_fill_parametersv2():
+    from example import data_test_1
+    user = "abc-123"
+    conversation_id = "1234567890"
+    response_mode = "blocking"
+    data_choose = {"file_path":"./test.h5ad"}
+    data_choose = json.dumps(data_choose)
+    query_template = {'SN': '', 'RegistJson': '', 'DataDir': '', 'ImageTar': '', 'ImagePreDir': '', 'Tissue': '', 'h5ad': ''}
+    result = await get_filled_parametersv2(data_choose, str(query_template), user, conversation_id, response_mode)
+    print(result)
 if __name__ == "__main__":
     # 运行异步主函数
     # asyncio.run(test_auto_fill_parameters())
-    asyncio.run(test_plan_generate())
+    # asyncio.run(test_plan_generate())
+    asyncio.run(test_auto_fill_parametersv2())

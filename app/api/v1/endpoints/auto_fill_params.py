@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, Depends
 from app.core.logging import get_logger
 from app.schemas.auto_fill_schema import AutoFilledParamsRequest, AutoFilledParamsResponse
 from app.utils.call_dify import get_filled_parameters
+from app.utils.get_params_v2 import main_request
 import json
 
 router = APIRouter()
@@ -81,6 +82,32 @@ async def auto_fill_parameters_v2_endpoint(request: AutoFilledParamsRequest):
         )
     except Exception as e:
         logger.error(f"处理请求时出错: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Internal server error: {str(e)}"
+        )
+
+@router.post("/auto_filled_params_all_plan", response_model=AutoFilledParamsResponse)
+async def auto_fill_parameters_all_plan_endpoint(request: AutoFilledParamsRequest):
+    """
+    自动填写参数接口 - 全计划版本
+    基于get_params_v2.py中main函数的逻辑
+    """
+    logger.info(f"收到全计划参数填写请求")
+    
+    try:
+        # 调用main_request函数处理全计划参数填写    
+        result = await main_request(arg1=request.data_meatinfo,file_path=request.query_template)
+
+        print("result:",result)
+        
+        return AutoFilledParamsResponse(
+            code=200,
+            message="Success",
+            filled_parameters=result
+        )
+    except Exception as e:
+        logger.error(f"全计划参数填写失败: {e}")
         raise HTTPException(
             status_code=500,
             detail=f"Internal server error: {str(e)}"

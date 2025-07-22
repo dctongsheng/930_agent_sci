@@ -5,6 +5,7 @@ from app.api.v1.endpoints import planning_generate
 from app.api.v1.endpoints import plan_check
 from app.api.v1.endpoints import recommend_images
 from app.api.v1.endpoints import error_checked
+from app.api.v1.endpoints import data_check
 
 api_router = APIRouter()
 
@@ -15,3 +16,4 @@ api_router.include_router(planning_generate.router, prefix="/planning_generate",
 api_router.include_router(plan_check.router, prefix="/plan_check", tags=["规划检查"])
 api_router.include_router(recommend_images.router, prefix="/recommend_images", tags=["推荐镜像"])
 api_router.include_router(error_checked.router, prefix="/error_checked", tags=["运行错误检查"])
+api_router.include_router(data_check.router, prefix="/data_check", tags=["数据检查"])
