@@ -9,7 +9,7 @@ wheels/
 # Virtual environments
 .venv
 logs/app.log
-app/utils/example.py
+# app/utils/example.py
 app/core/data_qc/
 
 test_api.py
