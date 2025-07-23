@@ -123,14 +123,23 @@ async def plan_check(query:dict):
         return -1
     return result
 
+def stringify_dict(input_dict):
+    output_dict = {}
+    for key, value in input_dict.items():
+        if isinstance(value, dict):
+            output_dict[key] = str(stringify_dict(value))  # 递归处理字典并转换为字符串
+        else:
+            output_dict[key] = str(value)  # 转换为字符串
+    return output_dict
+
 async def recommend_images(query:dict):
     api_key = "app-WFwn3n3Ns274laHmM5OUIFtX"  # 替换为实际的API密钥
-    json_query = json.dumps(query,ensure_ascii=False)
-
+    # json_query = json.dumps(query,ensure_ascii=False)
+    # print(query)
     try:
         result = await run_workflow(
             api_key=api_key,
-            inputs={"query": json_query},
+            inputs=stringify_dict(query),
             response_mode="blocking",
             user="abc-123"
         )
@@ -158,6 +167,8 @@ async def error_check(query:dict):
         print(f"工作流执行失败: {e}")
         return -1
     
+
+    
 async def data_check(query:dict):
     api_key = "app-H22BojPCUnbVgphRjbWu125X"  # 替换为实际的API密钥
     json_query = json.dumps(query,ensure_ascii=False)
@@ -183,9 +194,10 @@ if __name__ == "__main__":
     # from example import plan_desc
     # asyncio.run(plan_check(plan_desc))
     #测试recommend_images
-    # from example import plan_desc_step3_ai
-    # asyncio.run(recommend_images(plan_desc_step3_ai))
+    from example import plan_desc_step3_ai
+    # print(plan_desc_step3_ai)
+    asyncio.run(recommend_images(plan_desc_step3_ai))
     #测试error_check
-    from example import images_error_check,data_test_1
+    # from example import images_error_check,data_test_1
     # asyncio.run(error_check(images_error_check))
-    asyncio.run(data_check(data_test_1))
+    # asyncio.run(data_check(data_test_1))

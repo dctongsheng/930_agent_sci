@@ -8,7 +8,7 @@ router = APIRouter()
 logger = get_logger(__name__)
 
 class RecommendImagesRequest(BaseModel):
-    query: Dict[str, Any]
+    input: Dict[str, Any]
 
 class RecommendImagesResponse(BaseModel):
     code: int
@@ -22,10 +22,12 @@ async def recommend_images_endpoint(request: RecommendImagesRequest):
     基于查询条件推荐相关图像
     """
     logger.info(f"收到图像推荐请求")
+
+    print(request.input)
     
     try:
         # 调用图像推荐函数
-        recommend_result = await recommend_images(request.query)
+        recommend_result = await recommend_images(request.input)
         
         if recommend_result is None:
             raise HTTPException(

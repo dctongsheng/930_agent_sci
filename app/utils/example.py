@@ -272,6 +272,7 @@ plan_desc={
         }
 
 plan_desc_step3_ai={
+  "query": {
 "title": "拟时序分析",
 "tools": "monocle2",
 "step": 2,
@@ -284,6 +285,8 @@ plan_desc_step3_ai={
 "input": "{\"processed_data\": [\".h5ad\"]}",
 "output": "{\"trajectory_data\": [\".h5ad\", \".png\", \".pdf\"]}",
 "plan_type": "ai"
+},
+  "zone":"ali"
 }
 
 images_error_check={
