@@ -11,6 +11,7 @@ logger = get_logger(__name__)
 class PlanningGenerateRequest(BaseModel):
     data_meatinfo: Dict[str, Any]
     query: str
+    omics: str
 
 class PlanningGenerateResponse(BaseModel):
     code: int
@@ -24,11 +25,28 @@ async def planning_generate_endpoint(request: PlanningGenerateRequest):
     基于data_meatinfo和query生成规划
     """
     logger.info(f"收到规划生成请求: {request.query}")
-    
+    data_choose=request.data_meatinfo
+
+    print(request.omics)
+
+
+
+    if request.omics != "":
+        res_l=[]
+        for i in data_choose["records"]:
+                
+            # if i["dataType"]==0:
+                i["omicsType"]=request.omics
+                print(i["omicsType"])
+                res_l.append(i)
+        data_choose["records"]=res_l
+
+            # print(data_choose["record"]["omicsType"])
+
     try:
         # 调用规划生成函数
         planning_result = await plan_generate(
-            data_choose=json.dumps(request.data_meatinfo),
+            data_choose=json.dumps(data_choose),
             query=request.query
         )
         fff={}
