@@ -41,7 +41,8 @@ def parse_parameters_to_defaults(param_string):
         
         for full_param_name, param_type in param_dict.items():
             # 提取参数名（去掉前缀）
-            param_name = full_param_name.split('.')[-1]
+            # param_name = full_param_name.split('.')[-1]
+            param_name = full_param_name
             
             # 查找默认值
             default_value = ""
