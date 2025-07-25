@@ -188,16 +188,48 @@ async def data_check(query:dict):
         return -1
 
 # 运行示例（如果直接执行此脚本）
+
+async def description_ai_auto_fill(query:dict):
+    api_key = "app-BQIOPjvPyGDFlwHFZiOr551K"  # 替换为实际的API密钥
+    json_query = json.dumps(query,ensure_ascii=False)
+    try:
+        result = await run_workflow(
+            api_key=api_key,
+            inputs={"planning": json_query},
+            response_mode="blocking",
+            user="abc-123"
+        )
+        # print(json.dumps(result, indent=2, ensure_ascii=False))
+        # print(result["data"]["outputs"]["structured_output"]["description"])
+        return result["data"]["outputs"]
+    except Exception as e:
+        print(f"工作流执行失败: {e}")
+        return -1
+
 if __name__ == "__main__":
 #   asyncio.run(intent_detection("富集分析"))
     #测试plan_check
     # from example import plan_desc
     # asyncio.run(plan_check(plan_desc))
     #测试recommend_images
-    from example import plan_desc_step3_ai
-    # print(plan_desc_step3_ai)
-    asyncio.run(recommend_images(plan_desc_step3_ai))
+    # from example import plan_desc_step3_ai
+    # # print(plan_desc_step3_ai)
+    # asyncio.run(recommend_images(plan_desc_step3_ai))
     #测试error_check
     # from example import images_error_check,data_test_1
     # asyncio.run(error_check(images_error_check))
     # asyncio.run(data_check(data_test_1))
+
+    # from example import description_ai_auto_fill
+    d={
+        "title": "拟时序分析",
+        "tools": "monocle2",
+        "step": 2,
+        "previous_step": [
+          "细胞聚类分析",
+          "细胞注释"
+        ],
+        "description": "\nAI自动补充",
+        "input": "",
+        "output": ""}
+    asyncio.run(description_ai_auto_fill(d))

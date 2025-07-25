@@ -2,6 +2,7 @@ import requests
 import json
 from app.utils.example import plan_steps_1,plan_steps_2,data_test_1
 from app.utils.call_dify import get_filled_parametersv2,get_filled_parameters
+from app.utils.run_workflow import description_ai_auto_fill
 
 
 import re
@@ -116,7 +117,7 @@ def output_node_info(dify_result):
     final_result_list=[] 
 
     for i in dify_result:
-        print("i:",i)
+        # print("i:",i)
         # print("i['model_id']:",i["model_id"])
         i_dict={}
         is_app=True
@@ -143,7 +144,7 @@ def output_node_info(dify_result):
             get_node_by_contain_relationship="MATCH (n {name: '%s'}) RETURN n" % i["name"]
             # print("get_node_by_contain_relationship:",get_node_by_contain_relationship)
             app_nodes=neo4j_query(get_node_by_contain_relationship)
-            print("app_nodes:",app_nodes)
+            # print("app_nodes:",app_nodes)
             app_nodes=app_nodes["results"][0]["data"][0]["row"]
             # print("app_nodes:",app_nodes)
             if len(app_nodes) > 0:
@@ -164,8 +165,8 @@ def output_node_info(dify_result):
                 i_dict["input"]=""
                 i_dict["output"]=""
                 i_dict["plan_type"]="ai"
-                i_dict["raw_input_params"]=""
-                i_dict["raw_output_params"]=""
+                i_dict["raw_input_params"]='{"input":""}'
+                i_dict["raw_output_params"]='{{"ai.step{num}.output":""}}'.format(num=n)
                 final_result_list.append(i_dict)
             n+=1
         else:
@@ -175,8 +176,8 @@ def output_node_info(dify_result):
             i_dict["input"]=""
             i_dict["output"]=""
             i_dict["plan_type"]="ai"
-            i_dict["raw_input_params"]=""
-            i_dict["raw_output_params"]=""
+            i_dict["raw_input_params"]='{"input":""}'
+            i_dict["raw_output_params"]='{{"ai.step{num}.output":""}}'.format(num=n)
             final_result_list.append(i_dict)
             n+=1
     return final_result_list
@@ -192,6 +193,13 @@ async def chuli_raw_planing(raw_params,file_path):
 
     index_last_step=0
     for i in raw_params:
+
+        if i["plan_type"] == "ai":
+            print("i:",i)
+            ai_auto_fill_result=await description_ai_auto_fill(i)
+            i["description"]=ai_auto_fill_result["structured_output"]["description"]
+            i["input"]=ai_auto_fill_result["structured_output"]["input"]
+            i["output"]=ai_auto_fill_result["structured_output"]["output"]
         if i["step"] == 1:
             if i["plan_type"] == "wdl":
                 query_template=parse_parameters_to_defaults(i["raw_input_params"])
@@ -213,6 +221,7 @@ async def chuli_raw_planing(raw_params,file_path):
                 print("触发了并行")
             final_result_list.append(i)
         else:
+            # print("i:",i)
             if i["previous_step"] not in step_depend_on:
                 step_depend_on.append(i["previous_step"])
                 process_steps.append(i)
@@ -226,10 +235,13 @@ async def chuli_raw_planing(raw_params,file_path):
             
             last_step_output=last_step["raw_output_params"]
             # print("last_step_output:",last_step_output)
+            # print("i['raw_input_params']:",i["raw_input_params"])
             input_this_step=parse_parameters_to_defaults(i["raw_input_params"])
             if last_step["plan_type"] == "wdl":
                 last_step_output=json.dumps(last_step_output)
-                print("last_step_output:",last_step_output)
+                # print("last_step_output:",last_step_output)
+                # print("999999999")
+                # print(input_this_step)
                 i["raw_input_params"]=await get_filled_parametersv2(data_choose=last_step_output,query_template=input_this_step,user=user,conversation_id=conversation_id,response_mode=response_mode)
                 i["raw_output_params"]=replace_values_with_placeholders(i["raw_output_params"])
                 print("ai自动填写参数:",i["raw_input_params"])
@@ -237,8 +249,9 @@ async def chuli_raw_planing(raw_params,file_path):
                 print("AI补充输入，固定补充输出")
                 i["raw_input_params"]=last_step_output
                 i["raw_output_params"]="{{{{ai.step{num}.output}}}}".format(num=i["step"])
+
             final_result_list.append(i)
-    print("step_depend_on:",step_depend_on)
+    # print("step_depend_on:",step_depend_on)
     return final_result_list
 
 import asyncio
@@ -254,5 +267,8 @@ async def main_request(arg1:dict,file_path:dict) -> dict:
     return {"result":final_result_list}
 
 if __name__ == "__main__":
+    from example import test_auto_fill_params
     res = asyncio.run(main_request(plan_steps_1,data_test_1))
     print(res)
+    rrr=asyncio.run(main_request(test_auto_fill_params,data_test_1))
+    print(rrr)
