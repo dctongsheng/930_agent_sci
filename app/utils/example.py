@@ -519,3 +519,45 @@ test_auto_fill_params={
         }
       ]
     }
+test_auto_fill_params_2={
+      "planning_steps": [
+        {
+          "title": "细胞注释",
+          "tools": "",
+          "step": 1,
+          "previous_step": [
+            "细胞聚类分析"
+          ],
+          "name": "Stereo_Miner_Autoannotation",
+          "oid": "6840fa0845902327e1a41229",
+          "description": "该WDL工作流的核心功能是使用SingleR工具基于参考数据集对单细胞进行自动细胞类型注释，包括内存估算、参考数据获取和细胞类型标注等步骤。",
+          "input": "{\"Stereo_Miner_Autoannotation_v1.h5ad\": [\".h5ad\"], \"Stereo_Miner_Autoannotation_v1.reference\": [\".h5ad\"]}",
+          "output": "{\"output\": [\".csv\", \".h5ad\", \".json\", \".pdf\", \".png\"]}",
+          "plan_type": "wdl"
+        },
+        {
+          "title": "基因网络调控分析",
+          "tools": "",
+          "step": 2,
+          "previous_step": "",
+          "name": "",
+          "oid": "",
+          "description": "",
+          "input": "",
+          "output": "",
+          "plan_type": "ai"
+        }
+      ]
+    }
+
+description_ai_auto_fill={
+        "title": "拟时序分析",
+        "tools": "monocle2",
+        "step": 2,
+        "previous_step": [
+          "细胞聚类分析",
+          "细胞注释"
+        ],
+        "description": "\nAI自动补充",
+        "input": "",
+        "output": ""}

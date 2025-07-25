@@ -145,7 +145,11 @@ def output_node_info(dify_result):
             # print("get_node_by_contain_relationship:",get_node_by_contain_relationship)
             app_nodes=neo4j_query(get_node_by_contain_relationship)
             # print("app_nodes:",app_nodes)
-            app_nodes=app_nodes["results"][0]["data"][0]["row"]
+            try:
+                app_nodes=app_nodes["results"][0]["data"][0]["row"]
+            except Exception as e:
+                print("e:",e)
+                app_nodes=app_nodes["results"][0]["data"]
             # print("app_nodes:",app_nodes)
             if len(app_nodes) > 0:
                 i_dict["name"]=app_nodes[0]["workflow_name"]
@@ -195,11 +199,13 @@ async def chuli_raw_planing(raw_params,file_path):
     for i in raw_params:
 
         if i["plan_type"] == "ai":
-            print("i:",i)
+            # print("i:",i)
             ai_auto_fill_result=await description_ai_auto_fill(i)
             i["description"]=ai_auto_fill_result["structured_output"]["description"]
             i["input"]=ai_auto_fill_result["structured_output"]["input"]
             i["output"]=ai_auto_fill_result["structured_output"]["output"]
+            if i["tools"] == "":
+                i["tools"]=ai_auto_fill_result["structured_output"]["tools"]
         if i["step"] == 1:
             if i["plan_type"] == "wdl":
                 query_template=parse_parameters_to_defaults(i["raw_input_params"])
@@ -258,9 +264,11 @@ import asyncio
 
 async def main_request(arg1:dict,file_path:dict) -> dict:
     # print("arg1:",arg1)
-
-    final_result_list=output_node_info(arg1["planning_steps"])
-
+    try:
+        final_result_list=output_node_info(arg1["planning_steps"])
+    except Exception as e:
+        print(e)
+    print("111")
     final_result_list=await chuli_raw_planing(final_result_list,file_path)
 
 

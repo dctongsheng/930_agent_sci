@@ -99,7 +99,7 @@ async def auto_fill_parameters_all_plan_endpoint(request: AutoFilledParamsReques
         # 调用main_request函数处理全计划参数填写    
         result = await main_request(arg1=request.data_meatinfo,file_path=request.query_template)
 
-        print("result:",result)
+        # print("result:",result)
         
         return AutoFilledParamsResponse(
             code=200,
