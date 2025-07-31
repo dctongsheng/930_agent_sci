@@ -9,6 +9,39 @@ import re
 
 import ast
 
+import json
+def get_data_from_auto_fill_params_(data_choose):
+    """
+    从自动填充参数中获取数据
+    """ 
+    data_choose=json.loads(data_choose)
+    final_res={}
+    res_file_list = []
+    res_forder_list = []
+    for i in data_choose["records"]:
+        print(i["dataType"])
+        if i["dataType"]=="0":
+            sun_param={}
+            for key,value in i.items():
+                if key in ["name","omics","menuPath","chipId"] and value != "":
+                    
+                    sun_param[key]=value
+            res_file_list.append(sun_param)
+        elif i["dataType"]=="1":
+            # print(i)
+            sun_param={}
+            for key,value in i.items():
+                if key in ["name","omics","menuPath","chipId"] and value != "":
+                    
+                    sun_param[key]=value
+            res_forder_list.append(sun_param)
+    if len(res_file_list)>0:
+        final_res["用户选中的文件："]=res_file_list
+    if len(res_forder_list)>0:
+        final_res["用户选中的文件夹"]=res_forder_list
+    # print("final_res:",final_res)
+    return final_res
+
 def replace_values_with_placeholders(input_str):
     # 将字符串解析为字典
     input_dict = ast.literal_eval(input_str)
@@ -238,20 +271,33 @@ async def chuli_raw_planing(raw_params,file_path):
                 print("触发了并行")
                 index_last_step=index_last_step-1
                 last_step=process_steps[index_last_step]
-            print("index_last_step:",index_last_step)
+            # print("index_last_step:",index_last_step)
             
             last_step_output=last_step["raw_output_params"]
             # print("last_step_output:",last_step_output)
             # print("i['raw_input_params']:",i["raw_input_params"])
             input_this_step=parse_parameters_to_defaults(i["raw_input_params"])
             if last_step["plan_type"] == "wdl":
-                last_step_output=json.dumps(last_step_output)
+
+                if  i["name"] == "Stereo_Miner_Preprocessing":
+                    
+                    data_choose_filter=get_data_from_auto_fill_params_(data_choose=data_choose)
+                    # print("data_choose_filter:",data_choose_filter)
+                    # print("last_step_output:",last_step_output)
+
+                    last_step_output["data_file_input"]=data_choose_filter["用户选中的文件："]
+                    # print("last_step_output:",last_step_output)
+                    last_step_output=json.dumps(last_step_output)
+                    # last_step_output["data_choose"]=
+                # print("data_choose,",data_choose)
+                else:
+                    last_step_output=json.dumps(last_step_output)
                 # print("last_step_output:",last_step_output)
                 # print("999999999")
                 # print(input_this_step)
                 i["raw_input_params"]=await get_filled_parametersv2(data_choose=last_step_output,query_template=input_this_step,user=user,conversation_id=conversation_id,response_mode=response_mode)
                 i["raw_output_params"]=replace_values_with_placeholders(i["raw_output_params"])
-                print("ai自动填写参数:",i["raw_input_params"])
+                # print("ai自动填写参数:",i["raw_input_params"])
             else:
                 print("AI补充输入，固定补充输出")
                 i["raw_input_params"]=last_step_output
