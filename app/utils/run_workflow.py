@@ -132,6 +132,15 @@ def stringify_dict(input_dict):
             output_dict[key] = str(value)  # 转换为字符串
     return output_dict
 
+def stringify_dict_2(input_dict):
+    output_dict = {}
+    for key, value in input_dict.items():
+        if isinstance(value, dict):
+            output_dict[key] = json.dumps(value,ensure_ascii=False)  # 递归处理字典并转换为字符串
+        else:
+            output_dict[key] = str(value)  # 转换为字符串
+    return output_dict
+
 async def recommend_images(query:dict):
     api_key = "app-WFwn3n3Ns274laHmM5OUIFtX"  # 替换为实际的API密钥
     # json_query = json.dumps(query,ensure_ascii=False)
@@ -206,6 +215,64 @@ async def description_ai_auto_fill(query:dict):
         print(f"工作流执行失败: {e}")
         return -1
 
+async def recommend_data(query:dict):
+    api_key = "app-vkRWjBRGgaFDoiWhMGN65e27"  # 替换为实际的API密钥
+    # json_query = json.dumps(query,ensure_ascii=False)
+    # print(query)
+    try:
+        res_test=stringify_dict(query)
+        print(type(res_test["plan_step"]))
+        print(res_test["plan_step"])
+        result = await run_workflow(
+            api_key=api_key,
+            inputs=stringify_dict(query),
+            response_mode="blocking",
+            user="abc-123"
+        )
+        print(json.dumps(result, indent=2, ensure_ascii=False))
+        print(result["data"]["outputs"])
+        return result["data"]["outputs"]
+    except Exception as e:
+        print(f"工作流执行失败: {e}")
+
+async def fill_params_images(query:dict):
+    api_key = "app-IBCmCILzLccUm7Sq0f6lEm5B"  # 替换为实际的API密钥
+    # json_query = json.dumps(query,ensure_ascii=False)
+    # print(query)
+    # print(stringify_dict(query))
+    try:
+        result = await run_workflow(
+            api_key=api_key,
+            inputs=stringify_dict(query),
+            response_mode="blocking",
+            user="abc-123"
+        )
+        print(json.dumps(result, indent=2, ensure_ascii=False))
+        print(result["data"]["outputs"])
+        return result["data"]["outputs"]
+    except Exception as e:
+        print(f"工作流执行失败: {e}")
+
+async def fill_meta_by_code(query:dict):
+    api_key = "app-yIKrmWNsNFZ3k30N5Vnuf7kP"  # 替换为实际的API密钥
+    # json_query = json.dumps(query,ensure_ascii=False)
+    inputs=stringify_dict_2(query)
+    print(type(inputs["planning"]))
+    print(inputs["planning"])
+    try:
+        result = await run_workflow(
+            api_key=api_key,
+            inputs=stringify_dict_2(query),
+            response_mode="blocking",
+            user="abc-123"
+        )
+        print(json.dumps(result, indent=2, ensure_ascii=False))
+        print(result["data"]["outputs"])
+        return result["data"]["outputs"]
+    except Exception as e:
+        print(f"工作流执行失败: {e}")
+        return -1
+
 if __name__ == "__main__":
 #   asyncio.run(intent_detection("富集分析"))
     #测试plan_check
@@ -221,15 +288,44 @@ if __name__ == "__main__":
     # asyncio.run(data_check(data_test_1))
 
     # from example import description_ai_auto_fill
-    d={
-        "title": "拟时序分析",
-        "tools": "monocle2",
-        "step": 2,
+    # d={
+    #     "title": "拟时序分析",
+    #     "tools": "monocle2",
+    #     "step": 2,
+    #     "previous_step": [
+    #       "细胞聚类分析",
+    #       "细胞注释"
+    #     ],
+    #     "description": "\nAI自动补充",
+    #     "input": "",
+    #     "output": ""}
+    # asyncio.run(description_ai_auto_fill(d))
+    #0806测试推荐数据
+    plan_step={
+        "title": "细胞互作分析",
+        "tools": "cellchat",
+        "step": 5,
         "previous_step": [
           "细胞聚类分析",
           "细胞注释"
         ],
-        "description": "\nAI自动补充",
-        "input": "",
-        "output": ""}
-    asyncio.run(description_ai_auto_fill(d))
+        "name": "",
+        "oid": "",
+        "description": "细胞互作分析是研究细胞间通讯网络的重要方法，通过分析配体-受体对的表达模式来揭示细胞间的信号传递机制。CellChat工具利用网络分析和模式识别算法，整合单细胞RNA测序数据中的配体-受体相互作用信息，构建细胞间通讯网络。该模块能够识别不同细胞类型之间的关键信号通路，揭示细胞群体间的功能协调机制。分析结果对于理解组织微环境、细胞分化调控和疾病发生机制具有重要意义，为后续的功能研究和生物标志物发现提供重要线索。",
+        "input": ".rds, .h5",
+        "output": ".pdf, .png, .html, .csv",
+        "plan_type": "ai",
+        "raw_input_params": {
+          "input": "{{Stereo_Miner_Autoannotation_v1.outh5ad}}"
+        },
+        "raw_output_params": {
+          "ai.step5.output": "{{ai.step5.output}}"
+        }
+      }
+
+    q={
+        "plan_step":plan_step,
+        "data_name": "sample.tissue.gef",
+        "first_node": "",
+        "omics":"STOmics"}
+    res=asyncio.run(recommend_data(q))

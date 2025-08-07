@@ -16,3 +16,5 @@ test_api.py
 test_code/
 test_auto_fill_params.py
 test_intent_detection.py
+
+app/core/config.py
