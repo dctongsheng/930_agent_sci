@@ -214,6 +214,23 @@ async def description_ai_auto_fill(query:dict):
     except Exception as e:
         print(f"工作流执行失败: {e}")
         return -1
+    
+async def description_ai_auto_fill_v2(query:dict):
+    api_key = "app-BQIOPjvPyGDFlwHFZiOr551K"  # 替换为实际的API密钥
+    # json_query = json.dumps(query,ensure_ascii=False)
+    try:
+        result = await run_workflow(
+            api_key=api_key,
+            inputs=stringify_dict(query),
+            response_mode="blocking",
+            user="abc-123"
+        )
+        # print(json.dumps(result, indent=2, ensure_ascii=False))
+        # print(result["data"]["outputs"]["structured_output"]["description"])
+        return result["data"]["outputs"]
+    except Exception as e:
+        print(f"工作流执行失败: {e}")
+        return -1
 
 async def recommend_data(query:dict):
     api_key = "app-vkRWjBRGgaFDoiWhMGN65e27"  # 替换为实际的API密钥
