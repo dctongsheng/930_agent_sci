@@ -42,6 +42,12 @@ def get_data_from_auto_fill_params_(data_choose):
     # print("final_res:",final_res)
     return final_res
 
+def get_file_path_name(input_list):
+    output=[]
+    for i in input_list:
+        output.append(i["menuPath"]+"/"+i["name"])
+    return output
+
 def replace_values_with_placeholders(input_str):
     # 将字符串解析为字典
     input_dict = ast.literal_eval(input_str)
@@ -230,19 +236,23 @@ async def chuli_raw_planing(raw_params,file_path):
     final_result_list=[]
 
     index_last_step=0
+    data_choose=json.dumps(file_path)
+    data_choose_filter_=get_data_from_auto_fill_params_(data_choose=data_choose)
+    
     for i in raw_params:
         if i["step"] == 1:
             if i["plan_type"] == "wdl":
                 query_template=parse_parameters_to_defaults(i["raw_input_params"])
-                data_choose=json.dumps(file_path)
+
                 i["raw_input_params"]=await get_filled_parameters(data_choose=data_choose,query_template=query_template,user=user,conversation_id=conversation_id,response_mode=response_mode)
                 i["raw_output_params"]=replace_values_with_placeholders(i["raw_output_params"])
                 # print("ai自动填写参数input:",i["raw_input_params"])
                 # print("ai自动填写参数output:",i["raw_output_params"])
             else:
                 print("固定补充")
-                i["raw_output_params"]="{{{{ai.step1.output}}}}"
-                i["raw_input_params"]=file_path
+                i["raw_output_params"]={"output":"{{{{ai.step1.output}}}}"}
+                print(data_choose_filter_)
+                i["raw_input_params"]={"input":get_file_path_name(data_choose_filter_["用户选中的文件："])}
 
 
             if i["previous_step"] not in step_depend_on:
