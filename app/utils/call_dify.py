@@ -106,12 +106,12 @@ async def plan_generate(data_choose: Dict[str, Any], query: str) -> Dict[str, An
             inputs={"data_choose": data_choose}, 
             query=query
         )
-        print("响应结果:", json.dumps(result, indent=2, ensure_ascii=False))
-        print(result)
+        # print("响应结果:", json.dumps(result, indent=2, ensure_ascii=False))
+        # print(result)
 
         answer = result.get("answer", "")
         print(answer)
-        print(type(answer))
+        # print(type(answer))
         return json.loads(answer)
         
     except Exception as e:

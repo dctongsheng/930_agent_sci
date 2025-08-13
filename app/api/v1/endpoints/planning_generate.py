@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from app.core.logging import get_logger
 from app.utils.call_dify import plan_generate
+from app.utils.run_workflow import description_ai_auto_fill
 from pydantic import BaseModel
 from typing import Dict, Any, Optional
 import json
@@ -49,9 +50,19 @@ async def planning_generate_endpoint(request: PlanningGenerateRequest):
             data_choose=json.dumps(data_choose),
             query=request.query
         )
+        for i in planning_result:
+            if i["plan_type"] == "ai":
+                # print("i:",i)
+                ai_auto_fill_result=await description_ai_auto_fill(i)
+                i["description"]=ai_auto_fill_result["structured_output"]["description"]
+                i["input"]=ai_auto_fill_result["structured_output"]["input"]
+                i["output"]=ai_auto_fill_result["structured_output"]["output"]
+                if i["tools"] == "":
+                    i["tools"]=ai_auto_fill_result["structured_output"]["tools"]
         fff={}
         fff["structured_output"]={"planning_steps":planning_result}
-        print(fff)
+        # print(fff)
+
         
         return PlanningGenerateResponse(
             code=200,

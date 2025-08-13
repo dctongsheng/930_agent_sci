@@ -231,15 +231,6 @@ async def chuli_raw_planing(raw_params,file_path):
 
     index_last_step=0
     for i in raw_params:
-
-        if i["plan_type"] == "ai":
-            # print("i:",i)
-            ai_auto_fill_result=await description_ai_auto_fill(i)
-            i["description"]=ai_auto_fill_result["structured_output"]["description"]
-            i["input"]=ai_auto_fill_result["structured_output"]["input"]
-            i["output"]=ai_auto_fill_result["structured_output"]["output"]
-            if i["tools"] == "":
-                i["tools"]=ai_auto_fill_result["structured_output"]["tools"]
         if i["step"] == 1:
             if i["plan_type"] == "wdl":
                 query_template=parse_parameters_to_defaults(i["raw_input_params"])
