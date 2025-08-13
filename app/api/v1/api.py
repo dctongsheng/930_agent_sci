@@ -8,6 +8,7 @@ from app.api.v1.endpoints import error_checked
 from app.api.v1.endpoints import data_check
 from app.api.v1.endpoints import recommend_data
 from app.api.v1.endpoints import fill_plan_meta_bycode
+from app.api.v1.endpoints import cline_prompt
 
 api_router = APIRouter()
 
@@ -21,3 +22,4 @@ api_router.include_router(error_checked.router, prefix="/error_checked", tags=["
 api_router.include_router(data_check.router, prefix="/data_check", tags=["数据检查"])
 api_router.include_router(recommend_data.router, prefix="/recommend_data", tags=["推荐数据"])
 api_router.include_router(fill_plan_meta_bycode.router, prefix="/fill_plan_meta_bycode", tags=["基于code填写meta"])
+api_router.include_router(cline_prompt.router, prefix="/cline_prompt", tags=["cline系统提示词"])
