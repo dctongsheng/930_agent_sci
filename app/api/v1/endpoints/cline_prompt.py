@@ -30,7 +30,7 @@ cline_prompt = '''
 - 包含完整的错误处理机制
 - 添加详细的注释和文档字符串
 - 文件工作目录为"/data/work"
-- 主代码程序采用main.py，改文件位置为"/data/work/main.py"
+- 主代码程序采用main.py，该文件位置为"/data/work/main.py"
 - 主代码程序运行命令为：python main.py --input {{输入的文件}} --output "/data/work"
 
 ### 2. 功能实现要点
