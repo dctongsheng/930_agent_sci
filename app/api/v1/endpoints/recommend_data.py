@@ -62,12 +62,14 @@ dic_p={
 }
 
 async def main_re_data(plan: dict,data_name:str,omics:str) -> dict:
+
     try:
         # 将字符串转换为字典
         result_dict = plan
         step_num = int(result_dict["step"])
         houzui = extract_suffix(data_name)
         previous_step=extra_previous_step(result_dict["previous_step"],result_dict["title"])
+        # print(previous_step)
         pipei_dict = dic_p[omics]
         if step_num==1:
             if houzui=="gef":
@@ -77,9 +79,17 @@ async def main_re_data(plan: dict,data_name:str,omics:str) -> dict:
             elif houzui=="cellbin.gef":
                 fff="Y00862D8.raw.cellbin.gef"
             elif houzui=="h5ad":
-                fff=pipei_dict[previous_step]
+                try:
+                    fff=pipei_dict[previous_step]
+                except Exception as e:
+                    fff=""
         else:
-            fff=pipei_dict[previous_step]
+            print(previous_step)
+
+            try:
+                fff=pipei_dict[previous_step]
+            except Exception as e:
+                    fff=""
         result_dict["demo_input_params"]={"input":fff}
         result_dict["demo_output_params"]={"output":"/home/work"}
         return {
@@ -131,7 +141,7 @@ async def recommend_images_endpoint(request: RecommendDataRequest):
     """
     logger.info(f"收到图像推荐请求")
 
-    print(request.input)
+    # print(request.input)
     res=request.input
     
     try:
