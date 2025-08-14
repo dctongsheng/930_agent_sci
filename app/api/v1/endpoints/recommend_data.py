@@ -8,6 +8,11 @@ import json
 router = APIRouter()
 logger = get_logger(__name__)
 
+import time
+
+# 生成当前时间戳（秒级整数）
+timestamp = int(time.time())
+
 class RecommendDataRequest(BaseModel):
     input: Dict[str, Any]
 
@@ -69,6 +74,8 @@ async def main_re_data(plan: dict,data_name:str,omics:str) -> dict:
         step_num = int(result_dict["step"])
         houzui = extract_suffix(data_name)
         previous_step=extra_previous_step(result_dict["previous_step"],result_dict["title"])
+
+        image_contain_name = result_dict["title"]+"_"+result_dict["tools"]+"_"+str(timestamp)
         # print(previous_step)
         pipei_dict = dic_p[omics]
         if step_num==1:
@@ -92,6 +99,7 @@ async def main_re_data(plan: dict,data_name:str,omics:str) -> dict:
                     fff=""
         result_dict["demo_input_params"]={"input":fff}
         result_dict["demo_output_params"]={"output":"/home/work"}
+        result_dict["image_contain_name"]=image_contain_name
         return {
             "result": result_dict,
         }
