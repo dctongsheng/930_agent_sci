@@ -172,13 +172,13 @@ def output_node_info(dify_result):
             # print("res_dependon:",res_dependon)
             i_dict["previous_step"]=i["previous_step"]
             # print("i_dict['previous_step']:",i_dict["previous_step"])
-            if i["tools"] != "":
+            if i["tools"] != "" and i["tools"] != None:
                 is_app=False
         except Exception as e:
             print("e:",e)
             i_dict["previous_step"]=""
             is_app=False
-    
+        print(is_app)
         if is_app:
             # get_node_by_contain_relationship="MATCH (n {model_id: %d})-[:contain]->(other) RETURN other LIMIT 1" % i["model_id"]
             get_node_by_contain_relationship="MATCH (n {name: '%s'}) RETURN n" % i["name"]
@@ -240,8 +240,10 @@ async def chuli_raw_planing(raw_params,file_path):
     data_choose_filter_=get_data_from_auto_fill_params_(data_choose=data_choose)
     
     for i in raw_params:
+        print(i)
         if i["step"] == 1:
             if i["plan_type"] == "wdl":
+                print(i)
                 query_template=parse_parameters_to_defaults(i["raw_input_params"])
 
                 i["raw_input_params"]=await get_filled_parameters(data_choose=data_choose,query_template=query_template,user=user,conversation_id=conversation_id,response_mode=response_mode)
