@@ -46,7 +46,7 @@ def get_file_path_name(input_list):
     output=[]
     for i in input_list:
         output.append(i["menuPath"]+"/"+i["name"])
-    return output
+    return output[0]
 
 def replace_values_with_placeholders(input_str):
     # 将字符串解析为字典
