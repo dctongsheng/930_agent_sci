@@ -16,9 +16,8 @@ cline_prompt = '''
 - `description`: 详细的功能描述和科学背景
 - `input`: 输入文件格式
 - `output`: 输出文件格式
-- `raw_input_params`: 输入参数配置
-- `raw_output_params`:  {"ai.step.output": "/data/work"}固定输出文件夹目录:"/data/work"
-
+- `demo_input_params`: 运行测试的时候，文件的位置，例如：{"input": "/home/stereonote/model/Script_demo_data/******"}
+- `demo_output_params`:  运行测试的时候，输出的位置：{"output": "/data/work"}
 ## 代码生成要求
 
 ### 1. 代码结构规范

@@ -97,8 +97,12 @@ async def main_re_data(plan: dict,data_name:str,omics:str) -> dict:
                 fff=pipei_dict[previous_step]
             except Exception as e:
                     fff=""
-        result_dict["demo_input_params"]={"input":fff}
-        result_dict["demo_output_params"]={"output":"/home/work"}
+
+        if fff:
+            result_dict["demo_input_params"]={"input":"/home/stereonote/model/Script_demo_data/"+fff}
+        else:
+            result_dict["demo_input_params"]={"input":fff}
+        result_dict["demo_output_params"]={"output":"/data/work"}
         result_dict["image_contain_name"]=image_contain_name
         return {
             "result": result_dict,
