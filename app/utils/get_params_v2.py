@@ -23,7 +23,7 @@ def get_data_from_auto_fill_params_(data_choose):
         if i["dataType"]=="0":
             sun_param={}
             for key,value in i.items():
-                if key in ["name","omics","menuPath","sampleId"] and value != "":
+                if key in ["name","omics","menuPath","id"] and value != "":
                     
                     sun_param[key]=value
             res_file_list.append(sun_param)
@@ -31,7 +31,7 @@ def get_data_from_auto_fill_params_(data_choose):
             # print(i)
             sun_param={}
             for key,value in i.items():
-                if key in ["name","omics","menuPath","sampleId"] and value != "":
+                if key in ["name","omics","menuPath","id"] and value != "":
                     
                     sun_param[key]=value
             res_forder_list.append(sun_param)
@@ -50,8 +50,8 @@ def get_file_path_name(input_list):
 def get_file_sampleid(input_list):
     output=[]
     for i in input_list:
-        q_name=i["name"].split(".")[0]
-        output.append(q_name+"_"+str(i["sampleId"]))
+        # q_name=i["name"].split(".")[0]
+        output.append(str(i["id"]))
     return output[0]
 
 def replace_values_with_placeholders(input_str):
