@@ -23,7 +23,7 @@ def get_data_from_auto_fill_params_(data_choose):
         if i["dataType"]=="0":
             sun_param={}
             for key,value in i.items():
-                if key in ["name","omics","menuPath","chipId"] and value != "":
+                if key in ["name","omics","menuPath","sampleId"] and value != "":
                     
                     sun_param[key]=value
             res_file_list.append(sun_param)
@@ -31,7 +31,7 @@ def get_data_from_auto_fill_params_(data_choose):
             # print(i)
             sun_param={}
             for key,value in i.items():
-                if key in ["name","omics","menuPath","chipId"] and value != "":
+                if key in ["name","omics","menuPath","sampleId"] and value != "":
                     
                     sun_param[key]=value
             res_forder_list.append(sun_param)
@@ -47,6 +47,12 @@ def get_file_path_name(input_list):
     for i in input_list:
         output.append(i["menuPath"]+"/"+i["name"])
     return output[0]
+def get_file_sampleid(input_list):
+    output=[]
+    for i in input_list:
+        q_name=i["name"].split(".")[0]
+        output.append(q_name+"_"+str(i["sampleId"]))
+    return output[0]
 
 def replace_values_with_placeholders(input_str):
     # 将字符串解析为字典
@@ -55,7 +61,7 @@ def replace_values_with_placeholders(input_str):
     # 替换值为占位符
     return {key: f'{{{{{key}}}}}' for key in input_dict.keys()}
 
-def parse_parameters_to_defaults(param_string):
+def parse_parameters_to_defaults(param_string,sampleid):
     """
     解析参数字符串，提取参数名和默认值
     
@@ -82,29 +88,33 @@ def parse_parameters_to_defaults(param_string):
             # 提取参数名（去掉前缀）
             # param_name = full_param_name.split('.')[-1]
             param_name = full_param_name
-            
+
+            if param_name.endswith(".SampleID"):
+
+                default_value=sampleid
+            else:
             # 查找默认值
-            default_value = ""
-            
-            # 使用正则表达式匹配默认值
-            # 匹配模式：default = 值
-            default_match = re.search(r'default\s*=\s*([^)]+)', param_type, re.IGNORECASE)
-            
-            if default_match:
-                default_str = default_match.group(1).strip()
+                default_value = ""
                 
-                # 处理不同类型的默认值
-                if default_str.lower() == 'true':
-                    default_value = True
-                elif default_str.lower() == 'false':
-                    default_value = False
-                elif default_str.isdigit():
-                    default_value = int(default_str)
-                elif re.match(r'^\d+\.\d+$', default_str):
-                    default_value = float(default_str)
-                else:
-                    # 保持原始字符串，去掉可能的引号
-                    default_value = default_str.strip('\'"')
+                # 使用正则表达式匹配默认值
+                # 匹配模式：default = 值
+                default_match = re.search(r'default\s*=\s*([^)]+)', param_type, re.IGNORECASE)
+                
+                if default_match:
+                    default_str = default_match.group(1).strip()
+                    
+                    # 处理不同类型的默认值
+                    if default_str.lower() == 'true':
+                        default_value = True
+                    elif default_str.lower() == 'false':
+                        default_value = False
+                    elif default_str.isdigit():
+                        default_value = int(default_str)
+                    elif re.match(r'^\d+\.\d+$', default_str):
+                        default_value = float(default_str)
+                    else:
+                        # 保持原始字符串，去掉可能的引号
+                        default_value = default_str.strip('\'"')
             
             result[param_name] = default_value
         
@@ -238,13 +248,18 @@ async def chuli_raw_planing(raw_params,file_path):
     index_last_step=0
     data_choose=json.dumps(file_path)
     data_choose_filter_=get_data_from_auto_fill_params_(data_choose=data_choose)
+
+    print(data_choose_filter_)
+
+    sampleid = get_file_sampleid(data_choose_filter_["用户选中的文件："])
+    print("sampleid:",sampleid)
     
     for i in raw_params:
         print(i)
         if i["step"] == 1:
             if i["plan_type"] == "wdl":
                 print(i)
-                query_template=parse_parameters_to_defaults(i["raw_input_params"])
+                query_template=parse_parameters_to_defaults(i["raw_input_params"],sampleid=sampleid)
 
                 i["raw_input_params"]=await get_filled_parameters(data_choose=data_choose,query_template=query_template,user=user,conversation_id=conversation_id,response_mode=response_mode)
                 i["raw_output_params"]=replace_values_with_placeholders(i["raw_output_params"])
@@ -279,7 +294,7 @@ async def chuli_raw_planing(raw_params,file_path):
             last_step_output=last_step["raw_output_params"]
             # print("last_step_output:",last_step_output)
             # print("i['raw_input_params']:",i["raw_input_params"])
-            input_this_step=parse_parameters_to_defaults(i["raw_input_params"])
+            input_this_step=parse_parameters_to_defaults(i["raw_input_params"],sampleid=sampleid)
             if last_step["plan_type"] == "wdl":
 
                 if  i["name"] == "Stereo_Miner_Preprocessing":
