@@ -156,10 +156,12 @@ async def recommend_images_endpoint(request: RecommendDataRequest):
 
     # print(request.input)
     res=request.input
+    print(res)
     
     try:
         # 调用图像推荐函数
         recommend_result = await main_re_data(res["plan_step"],res["data_name"],res["omics"])
+        print(recommend_result)
         
         if recommend_result is None:
             raise HTTPException(
