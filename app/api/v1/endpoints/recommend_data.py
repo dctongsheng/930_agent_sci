@@ -62,7 +62,8 @@ dic_p={
   "数据预处理": "tetssc123_scRNA_dataqc.h5ad",
   "数据质控分析": "filter_matrix",
   "细胞聚类分析": "demo_scRNA_cluster_anndata.h5ad",
-  "细胞注释": "demo_scRNA_cluster_anndata.h5ad"
+  "细胞注释": "demo_scRNA_cluster_anndata.h5ad",
+  "拟时序分析": "demo_scRNA.annotation.h5ad"
 }
 }
 
