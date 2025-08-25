@@ -27,10 +27,10 @@ cline_prompt = '''
 - 添加详细的注释和文档字符串
 - 文件工作目录为"/data/work"，所有产生的代码、数据等文件都应该在这个目录下
 - 主代码程序采用main.py，该文件位置为"/data/work/main.py"
-- `previous_step`字段是已经完成的步骤，该步骤相关的代码不要进行重复编写了
+- {{previous_step}}这一步已经完成，不要再写该部分的代码了
 - 主代码程序运行命令为：python main.py --input {{输入的文件}} --output "/data/work"
 - 运行测试前必须先执行：pip install -r requirements.txt
-- 
+
 
 ### 2. 功能实现要点
 - **参数解析**: 正确解析 `raw_input_params` ，是数据的输入口,raw_output_params是产生代码以及文件输出的文件夹出口
@@ -50,7 +50,7 @@ cline_prompt = '''
 ```python
 #!/usr/bin/env python3
 """
-{title} - Step {step}
+{{title}} - Step {{step}}
 Generated automatically based on planning configuration
 """
 
