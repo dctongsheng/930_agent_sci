@@ -12,7 +12,7 @@ cline_prompt = '''
 - `title`: 分析任务标题
 - `tools`: 使用的生物信息学工具名称
 - `step`: 当前步骤编号
-- `previous_step`: 改文件已经完成的步骤（该输入文件是该步骤产生的）
+- `previous_step`: 该文件已经完成的步骤（该输入文件是该步骤产生的）
 - `description`: 详细的功能描述和科学背景
 - `input`: 输入文件格式
 - `output`: 输出文件格式
@@ -27,8 +27,10 @@ cline_prompt = '''
 - 添加详细的注释和文档字符串
 - 文件工作目录为"/data/work"，所有产生的代码、数据等文件都应该在这个目录下
 - 主代码程序采用main.py，该文件位置为"/data/work/main.py"
+- `previous_step`字段是已经完成的步骤，该步骤相关的代码不要进行重复编写了
 - 主代码程序运行命令为：python main.py --input {{输入的文件}} --output "/data/work"
-- **运行测试前必须先执行：pip install -r requirements.txt**
+- 运行测试前必须先执行：pip install -r requirements.txt
+- 
 
 ### 2. 功能实现要点
 - **参数解析**: 正确解析 `raw_input_params` ，是数据的输入口,raw_output_params是产生代码以及文件输出的文件夹出口
