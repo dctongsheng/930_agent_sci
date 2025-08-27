@@ -19,7 +19,7 @@ def get_data_from_auto_fill_params_(data_choose):
     res_file_list = []
     res_forder_list = []
     for i in data_choose["records"]:
-        print(i["dataType"])
+        # print(i["dataType"])
         if i["dataType"]=="0":
             sun_param={}
             for key,value in i.items():
@@ -253,16 +253,16 @@ async def chuli_raw_planing(raw_params,file_path):
     data_choose=json.dumps(file_path)
     data_choose_filter_=get_data_from_auto_fill_params_(data_choose=data_choose)
 
-    print(data_choose_filter_)
+    # print(data_choose_filter_)
 
     sampleid = get_file_sampleid(data_choose_filter_["用户选中的文件："])
     print("sampleid:",sampleid)
     
     for i in raw_params:
-        print(i)
+        # print(i)
         if i["step"] == 1:
             if i["plan_type"] == "wdl":
-                print(i)
+                # print(i)
                 query_template=parse_parameters_to_defaults(i["raw_input_params"],sampleid=sampleid)
 
                 i["raw_input_params"]=await get_filled_parameters(data_choose=data_choose,query_template=query_template,user=user,conversation_id=conversation_id,response_mode=response_mode)
@@ -272,7 +272,7 @@ async def chuli_raw_planing(raw_params,file_path):
             else:
                 print("固定补充")
                 i["raw_output_params"]={"output":"{{{{ai.step1.output}}}}"}
-                print(data_choose_filter_)
+                # print(data_choose_filter_)
                 i["raw_input_params"]={"input":get_file_path_name(data_choose_filter_["用户选中的文件："])}
 
 
