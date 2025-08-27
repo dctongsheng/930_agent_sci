@@ -173,6 +173,8 @@ def output_node_info(dify_result):
     for i in dify_result:
         # print("i:",i)
         # print("i['model_id']:",i["model_id"])
+        print(i["plan_type"])
+
         i_dict={}
         is_app=True
         i_dict["title"]=i["title"]
@@ -192,6 +194,8 @@ def output_node_info(dify_result):
             print("e:",e)
             i_dict["previous_step"]=""
             is_app=False
+        if i["plan_type"]=="ai":
+            is_app=False      
         print(is_app)
         if is_app:
             # get_node_by_contain_relationship="MATCH (n {model_id: %d})-[:contain]->(other) RETURN other LIMIT 1" % i["model_id"]
@@ -219,9 +223,9 @@ def output_node_info(dify_result):
             else:
                 i_dict["name"]=""
                 i_dict["oid"]=""
-                i_dict["description"]=""
-                i_dict["input"]=""
-                i_dict["output"]=""
+                i_dict["description"]=i["description"]
+                i_dict["input"]=i["input"]
+                i_dict["output"]=i["output"]
                 i_dict["plan_type"]="ai"
                 i_dict["raw_input_params"]='{"input":""}'
                 i_dict["raw_output_params"]='{{"ai.step{num}.output":""}}'.format(num=n)
@@ -230,9 +234,9 @@ def output_node_info(dify_result):
         else:
             i_dict["name"]=""
             i_dict["oid"]=""
-            i_dict["description"]=""
-            i_dict["input"]=""
-            i_dict["output"]=""
+            i_dict["description"]=i["description"]
+            i_dict["input"]=i["input"]
+            i_dict["output"]=i["output"]
             i_dict["plan_type"]="ai"
             i_dict["raw_input_params"]='{"input":""}'
             i_dict["raw_output_params"]='{{"ai.step{num}.output":""}}'.format(num=n)
@@ -259,6 +263,11 @@ async def chuli_raw_planing(raw_params,file_path):
     print("sampleid:",sampleid)
     
     for i in raw_params:
+        # print(i)
+        # if i["plan_type"]=="ai":
+        #     # print(i)
+        #     i["name"]=""
+            # print(i)
         # print(i)
         if i["step"] == 1:
             if i["plan_type"] == "wdl":
