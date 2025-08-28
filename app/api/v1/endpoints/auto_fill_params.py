@@ -102,7 +102,8 @@ async def auto_fill_parameters_all_plan_endpoint(request: AutoFilledParamsReques
         result = await main_request(arg1=request.data_meatinfo,file_path=request.query_template)
 
         print("result:",result)
-        logger.info("result:",result)
+        logger.info("result:")
+        logger.info(result)
         
         return AutoFilledParamsResponse(
             code=200,
