@@ -330,9 +330,15 @@ async def chuli_raw_planing(raw_params,file_path):
                 i["raw_output_params"]=replace_values_with_placeholders(i["raw_output_params"])
                 # print("ai自动填写参数:",i["raw_input_params"])
             else:
-                print("AI补充输入，固定补充输出")
-                i["raw_input_params"]=last_step_output
-                i["raw_output_params"]="{{{{ai.step{num}.output}}}}".format(num=i["step"])
+                try:
+                    print("AI补充输入，固定补充输出")
+                    i["raw_input_params"]={"input":last_step_output["output"]}
+                    i["raw_output_params"]={"output":"{{{{ai.step{num}.output}}}}".format(num=i["step"])}
+                except Exception as e:
+                    print(e)
+                    print("AI补充输入，固定补充输出")
+                    i["raw_input_params"]={"input":last_step_output}
+                    i["raw_output_params"]={"output":"{{{{ai.step{num}.output}}}}".format(num=i["step"])}
 
             final_result_list.append(i)
     # print("step_depend_on:",step_depend_on)
