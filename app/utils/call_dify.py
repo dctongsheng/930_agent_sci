@@ -4,13 +4,14 @@ import json
 from typing import Dict, Any
 # from example import auto_fill_parameters_data_rna_3
 
-async def chat_with_api(api_key: str, inputs: Dict[str, Any], query: str) -> Dict[str, Any]:
+async def chat_with_api(api_key: str, inputs: Dict[str, Any], query: str, conversation_id: str="") -> Dict[str, Any]:
     """
     异步调用聊天API的函数
     
     Args:
         inputs (Dict[str, Any]): 输入参数字典
         query (str): 查询内容
+        conversation_id (str): 会话ID
     
     Returns:
         Dict[str, Any]: API响应结果
@@ -31,7 +32,7 @@ async def chat_with_api(api_key: str, inputs: Dict[str, Any], query: str) -> Dic
         "inputs": inputs,
         "query": query,
         "response_mode": "blocking",
-        "conversation_id": "",
+        "conversation_id": conversation_id,
         "user": "abc-123"
     }
     
@@ -118,6 +119,29 @@ async def plan_generate(data_choose: Dict[str, Any], query: str) -> Dict[str, An
         print(f"调用失败: {e}")
         raise
 
+async def multi_chat_with_api(data_choose: Dict[str, Any], query: str, conversation_id: str="") -> Dict[str, Any]:
+    api_key = "app-yzunSc5JPwXjnqkkc2qUUH7P" 
+    try:
+        # 调用异步API
+        result = await chat_with_api(
+            api_key=api_key,
+            inputs={"data_choose": data_choose}, 
+            query=query,
+            conversation_id=conversation_id
+        )
+        # print("响应结果:", json.dumps(result, indent=2, ensure_ascii=False))
+        # print(result)
+
+        answer = result.get("answer", "")
+        print(answer)
+        # print(type(answer))
+        return json.loads(answer)
+        
+    except Exception as e:
+        print(f"调用失败: {e}")
+        raise
+
+
 # 使用示例
 async def test_auto_fill_parameters():
     from example import data_test_1
@@ -146,8 +170,16 @@ async def test_auto_fill_parametersv2():
     query_template = {'SN': '', 'RegistJson': '', 'DataDir': '', 'ImageTar': '', 'ImagePreDir': '', 'Tissue': '', 'h5ad': ''}
     result = await get_filled_parametersv2(data_choose, str(query_template), user, conversation_id, response_mode)
     print(result)
+
+async def test_multi_chat_with_api():
+    from example import data_test_2
+    data_choose = json.dumps(data_test_2)
+    query_template = "单细胞"
+    result = await multi_chat_with_api(data_choose, query_template,conversation_id="97128799-0268-4c2b-9673-89319529be08")
+    print(result)
 if __name__ == "__main__":
     # 运行异步主函数
     # asyncio.run(test_auto_fill_parameters())
     # asyncio.run(test_plan_generate())
-    asyncio.run(test_auto_fill_parametersv2())
+    # asyncio.run(test_auto_fill_parametersv2())
+    asyncio.run(test_multi_chat_with_api())

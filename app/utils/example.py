@@ -225,7 +225,22 @@ data_test_1={
   }
   ]
   }
-
+data_test_2={
+  "records": [
+  {
+    "omicsType": "",
+    "dataType":"0",
+    "omics": "",
+    "name": "1111.h5ad",
+    "menuPath": "/Files/ResultData/Workflow/W202506120003255",
+    "menuId":"",
+    "species":"",
+    "wfName":"",
+    "tissue":"",
+    "processId":""
+  }
+  ]
+  }
 plan_desc={
           "planning_steps": [
             {
