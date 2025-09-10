@@ -15,7 +15,7 @@ class MultiChatRequest(BaseModel):
 class MultiChatResponse(BaseModel):
     code: int
     message: str
-    recommend_result: Optional[Dict[str, Any]] = None
+    planning_result: Optional[Dict[str, Any]] = None
 
 @router.post("/multi_chat_data_choose", response_model=MultiChatResponse)
 async def multi_chat_endpoint(request: MultiChatRequest):
@@ -32,9 +32,9 @@ async def multi_chat_endpoint(request: MultiChatRequest):
     
     try:
         # 调用图像推荐函数
-        recommend_result = await multi_chat_with_api(json.dumps(data_choose),query_template,conversation_id)
+        planning_result = await multi_chat_with_api(json.dumps(data_choose),query_template,conversation_id)
         
-        if recommend_result is None:
+        if planning_result is None:
             raise HTTPException(
                 status_code=500,
                 detail="图像推荐失败"
@@ -43,7 +43,7 @@ async def multi_chat_endpoint(request: MultiChatRequest):
         return MultiChatResponse(
             code=200,
             message="Success",
-            recommend_result=recommend_result
+            planning_result=planning_result
         )
     except HTTPException:
         raise
