@@ -52,7 +52,7 @@ async def multi_chat_endpoint(request: MultiChatRequest):
             return MultiChatResponse(
                 code=200,
                 message="Success",
-                planning_result={"need_plan":1,"key_text":"直接调用planning生成"}
+                planning_result={"mul_chat":"never","key_text":"直接调用planning生成"}
             )         
     except HTTPException:
         raise
