@@ -11,7 +11,7 @@ class MultiChatRequest(BaseModel):
     data_choose: Dict[str, Any]
     query_template: str
     conversation_id: str
-    need_plan: int
+    need_plan: int=0
 
 class MultiChatResponse(BaseModel):
     code: int
