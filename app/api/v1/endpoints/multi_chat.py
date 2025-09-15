@@ -29,6 +29,7 @@ async def multi_chat_endpoint(request: MultiChatRequest):
     query_template=request.query_template
     conversation_id=request.conversation_id
     need_plan=request.need_plan
+    need_plan=False
 
     # print(request.input)
     
