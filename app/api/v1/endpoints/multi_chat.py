@@ -11,7 +11,7 @@ class MultiChatRequest(BaseModel):
     data_choose: Dict[str, Any]
     query_template: str
     conversation_id: str
-    need_plan: int=0
+    need_plan: bool=False
 
 class MultiChatResponse(BaseModel):
     code: int
@@ -34,7 +34,7 @@ async def multi_chat_endpoint(request: MultiChatRequest):
     
     try:
         # 调用图像推荐函数
-        if need_plan==0:
+        if not need_plan:
             planning_result = await multi_chat_with_api(json.dumps(data_choose),query_template,conversation_id)
             
             if planning_result is None:
@@ -52,7 +52,7 @@ async def multi_chat_endpoint(request: MultiChatRequest):
             return MultiChatResponse(
                 code=200,
                 message="Success",
-                planning_result={"mul_chat":"never","key_text":"直接调用planning生成"}
+                planning_result={"mul_chat":False,"key_text":"直接调用planning生成"}
             )         
     except HTTPException:
         raise
