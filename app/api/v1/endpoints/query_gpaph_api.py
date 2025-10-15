@@ -35,14 +35,15 @@ async def get_possible_pipeline_endpoint(request: PipelineRequest):
             preloading=request.preloading,
             project=request.project,
         )
-
+        print(result["possible_pipeline"])
+        rrr={"pipeline":result["possible_pipeline"],"long_pipeline":len(result["possible_pipeline"])}
         if not isinstance(result, dict):
             raise HTTPException(status_code=500, detail="查询结果异常")
 
         return PipelineResponse(
             code=200,
             message="Success",
-            result=result,
+            result=rrr,
         )
     except HTTPException:
         raise
