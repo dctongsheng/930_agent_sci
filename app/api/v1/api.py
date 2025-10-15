@@ -10,6 +10,7 @@ from app.api.v1.endpoints import recommend_data
 from app.api.v1.endpoints import fill_plan_meta_bycode
 from app.api.v1.endpoints import cline_prompt
 from app.api.v1.endpoints import multi_chat
+from app.api.v1.endpoints import query_gpaph_api
 
 api_router = APIRouter()
 
@@ -25,3 +26,4 @@ api_router.include_router(recommend_data.router, prefix="/recommend_data", tags=
 api_router.include_router(fill_plan_meta_bycode.router, prefix="/fill_plan_meta_bycode", tags=["基于code填写meta"])
 api_router.include_router(cline_prompt.router, prefix="/cline_prompt", tags=["cline系统提示词"])
 api_router.include_router(multi_chat.router, prefix="/multi_chat", tags=["多轮对话"])
+api_router.include_router(query_gpaph_api.router, prefix="/query_gpaph_api", tags=["生成pipline"])
