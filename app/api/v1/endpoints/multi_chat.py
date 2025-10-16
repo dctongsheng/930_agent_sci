@@ -86,6 +86,8 @@ async def pipline_generate_endpoint(request: MultiChatRequest):
         try:
             planning_result_pipeline = get_possible_pipeline(planning_result["lastnode"],planning_result["preloading"],planning_result["projectid"])
             print(planning_result_pipeline)
+            result001=query_workflow_id(planning_result_pipeline["possible_pipeline"][0])
+            print(result001)
         except Exception as e:
             logger.error(f"生成pipline失败: {e}")
             raise HTTPException(

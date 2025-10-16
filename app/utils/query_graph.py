@@ -238,7 +238,11 @@ def get_possible_pipeline(tool_names, preloading, project):
     copied_public_tools = query_cypher(f"""MATCH (n:Tools)-[r:copy_from]->(m:Tools) 
     WHERE n.workflow_id in $all_tool_id_list 
     AND m.workflow_id in $all_tool_id_list
-    return m.workflow_id""", parameters={'all_tool_id_list':all_tool_id_list})['m.workflow_id'].tolist()
+    return m.workflow_id""", parameters={'all_tool_id_list':all_tool_id_list})
+    if copied_public_tools.shape[0] == 0:
+        copied_public_tools = []
+    else:
+        copied_public_tools = copied_public_tools['m.workflow_id'].tolist()
     
     all_tool_list = all_tool_list.loc[~all_tool_list['n.workflow_id'].isin(copied_public_tools)]
     all_tool_id_list = all_tool_list['n.workflow_id'].to_list()
@@ -349,5 +353,4 @@ if __name__ == "__main__":
     project = 'P20250228091931671'
     
     result = get_possible_pipeline(tool_names, preloading, project)
-    print(result)
 
