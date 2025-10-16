@@ -5,6 +5,10 @@ from app.utils.call_dify import pipline_generate
 from pydantic import BaseModel
 from typing import Dict, Any, Optional
 import json
+from app.utils.query_graph import get_possible_pipeline
+from app.utils.search_tools_by_id import query_workflow_id
+
+
 router = APIRouter()
 logger = get_logger(__name__)
 
@@ -78,6 +82,16 @@ async def pipline_generate_endpoint(request: MultiChatRequest):
     need_plan=True
     try:
         planning_result = await pipline_generate(json.dumps(data_choose),query_template,conversation_id)
+
+        try:
+            planning_result_pipeline = get_possible_pipeline(planning_result["lastnode"],planning_result["preloading"],planning_result["projectid"])
+            print(planning_result_pipeline)
+        except Exception as e:
+            logger.error(f"生成pipline失败: {e}")
+            raise HTTPException(
+                status_code=500,
+                detail=f"Internal server error: {str(e)}"
+            )
         
         if planning_result is None:
             raise HTTPException(

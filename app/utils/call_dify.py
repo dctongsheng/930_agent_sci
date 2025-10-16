@@ -142,7 +142,7 @@ async def multi_chat_with_api(data_choose: Dict[str, Any], query: str, conversat
         raise
 
 async def pipline_generate(data_choose: Dict[str, Any], query: str, conversation_id: str="") -> Dict[str, Any]:
-    api_key = "app-jOopEx3N4hirBSuUDLOd3P5o" 
+    api_key = "app-nVpFTNeXiLGMlbPwegevFYnV" 
     try:
         # 调用异步API
         result = await chat_with_api(
