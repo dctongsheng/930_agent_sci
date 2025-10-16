@@ -241,6 +241,26 @@ data_test_2={
   }
   ]
   }
+
+data_test_3={
+  "records": [
+  {
+    "omicsType": "",
+    "dataType":"0",
+    "omics": "STOmics",
+    "name": "A02677B5_cluster_anndata.h5ad",
+    "menuPath": "/Files/ResultData/Workflow/W202506120003255",
+    "projectId": "P20250811143255472",
+    "srcFilePath": "/stomics/PM/odms/test/ods/stomics/analysisResult/worflow/P1600787473158537217/202506/test_1938541728136495105/result/Clustering/A02677B5_cluster_anndata.h5ad",
+    "menuId":"",
+    "species":"",
+    "wfName":"",
+    "tissue":"",
+    "processId":"SC_Miner_Clustering_v0"
+  }
+  ]
+  }
+
 plan_desc={
           "planning_steps": [
             {

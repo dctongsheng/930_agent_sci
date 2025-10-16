@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from app.core.logging import get_logger
 from app.utils.call_dify import multi_chat_with_api
+from app.utils.call_dify import pipline_generate
 from pydantic import BaseModel
 from typing import Dict, Any, Optional
 import json
@@ -59,6 +60,39 @@ async def multi_chat_endpoint(request: MultiChatRequest):
         raise
     except Exception as e:
         logger.error(f"图像推荐失败: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Internal server error: {str(e)}"
+        )
+
+@router.post("/pipline_generate", response_model=MultiChatResponse)
+async def pipline_generate_endpoint(request: MultiChatRequest):
+    """
+    生成pipline接口
+    """
+    logger.info(f"收到生成pipline请求")
+    data_choose=request.data_choose
+    query_template=request.query_template
+    conversation_id=request.conversation_id
+    need_plan=request.need_plan
+    need_plan=True
+    try:
+        planning_result = await pipline_generate(json.dumps(data_choose),query_template,conversation_id)
+        
+        if planning_result is None:
+            raise HTTPException(
+                status_code=500,
+                detail="生成pipline失败"
+            )
+        return MultiChatResponse(
+            code=200,
+            message="Success",
+            planning_result=planning_result
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"生成pipline失败: {e}")
         raise HTTPException(
             status_code=500,
             detail=f"Internal server error: {str(e)}"

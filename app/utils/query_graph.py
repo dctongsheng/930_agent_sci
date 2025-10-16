@@ -240,7 +240,7 @@ def get_possible_pipeline(tool_names, preloading, project):
     AND m.workflow_id in $all_tool_id_list
     return m.workflow_id""", parameters={'all_tool_id_list':all_tool_id_list})['m.workflow_id'].tolist()
     
-    all_tool_list = all_tool_list.loc[~all_tool_list['n.workflow_id'].isin([copied_public_tools])]
+    all_tool_list = all_tool_list.loc[~all_tool_list['n.workflow_id'].isin(copied_public_tools)]
     all_tool_id_list = all_tool_list['n.workflow_id'].to_list()
     
     # get tool input and output
@@ -287,7 +287,7 @@ def get_possible_pipeline(tool_names, preloading, project):
     # print(tok - tik)
     all_possible_pipeline = pd.DataFrame(all_possible_pipeline)
     
-    all_possible_pipeline['end'] = [x[-1] for x in all_possible_pipeline['pipeline']]
+    all_possible_pipeline['end'] = [id2name[x[-1]] for x in all_possible_pipeline['pipeline']]
     all_possible_pipeline["pure_requirement_length"] = [len(x) for x in all_possible_pipeline['pure_requirement']]
     
     target_tool_ids = []
@@ -305,10 +305,12 @@ def get_possible_pipeline(tool_names, preloading, project):
     
     valid_pipeline = []
     for x, y in all_possible_pipeline.groupby('end'):
+
         validate_y = y.loc[y['pure_requirement_length']==0]
         if validate_y.shape[0]==0:
+            task_id = y['pipeline'].to_list()[0][-1]
             result["success"] = False
-            result['require_data_states'] = {x : list(set(tools2input[x]) - set(preloading))}
+            result['require_data_states'] = {task_id : list(set(tools2input[task_id]) - set(preloading))}
             return result
             break
         else:
@@ -340,12 +342,9 @@ def get_possible_pipeline(tool_names, preloading, project):
     return result
 
 if __name__ == "__main__":
-    url = "bolt://10.224.28.80:10112"
-    auth = ("neo4j", "f012464998")  
+
     
-    config(url, auth=auth)
-    
-    tool_names = ['GraphST_Tutorial', 'Stereo_Miner_Clustering']
+    tool_names = ['GraphST_Tutorial', 'SpaGCN_Tutorial']
     preloading = [ "raw", "qc", 'spatial']
     project = 'P20250228091931671'
     

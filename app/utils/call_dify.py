@@ -141,6 +141,28 @@ async def multi_chat_with_api(data_choose: Dict[str, Any], query: str, conversat
         print(f"调用失败: {e}")
         raise
 
+async def pipline_generate(data_choose: Dict[str, Any], query: str, conversation_id: str="") -> Dict[str, Any]:
+    api_key = "app-jOopEx3N4hirBSuUDLOd3P5o" 
+    try:
+        # 调用异步API
+        result = await chat_with_api(
+            api_key=api_key,
+            inputs={"data_choose": data_choose}, 
+            query=query,
+            conversation_id=conversation_id
+        )
+        # print("响应结果:", json.dumps(result, indent=2, ensure_ascii=False))
+        # print(result)
+
+        answer = result.get("answer", "")
+        print(answer)
+        # print(type(answer))
+        return json.loads(answer)
+        
+    except Exception as e:
+        print(f"调用失败: {e}")
+        raise
+
 
 # 使用示例
 async def test_auto_fill_parameters():
@@ -177,9 +199,17 @@ async def test_multi_chat_with_api():
     query_template = "单细胞"
     result = await multi_chat_with_api(data_choose, query_template,conversation_id="97128799-0268-4c2b-9673-89319529be08")
     print(result)
+
+async def test_pipline_generate():
+    from example import data_test_3
+    data_choose = json.dumps(data_test_3)
+    query_template = "聚类分析"
+    result = await pipline_generate(data_choose, query_template,conversation_id="97128799-0268-4c2b-9673-89319529be08")
+    print(result)
 if __name__ == "__main__":
     # 运行异步主函数
     # asyncio.run(test_auto_fill_parameters())
     # asyncio.run(test_plan_generate())
     # asyncio.run(test_auto_fill_parametersv2())
     asyncio.run(test_multi_chat_with_api())
+    # asyncio.run(test_pipline_generate())
