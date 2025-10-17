@@ -15,7 +15,8 @@ logger = get_logger(__name__)
 class MultiChatRequest(BaseModel):
     data_choose: Dict[str, Any]
     query_template: str
-    conversation_id: str
+    conversation_id: str    
+    xtoken: str
     need_plan: bool=False
 
 class MultiChatResponse(BaseModel):
@@ -79,15 +80,22 @@ async def pipline_generate_endpoint(request: MultiChatRequest):
     query_template=request.query_template
     conversation_id=request.conversation_id
     need_plan=request.need_plan
+    xtoken=request.xtoken
     need_plan=True
     try:
-        planning_result = await pipline_generate(json.dumps(data_choose),query_template,conversation_id)
+        planning_result = await pipline_generate(json.dumps(data_choose),query_template,conversation_id,xtoken)
+        logger.info(f"planning_result: {planning_result}")
 
         try:
-            planning_result_pipeline = get_possible_pipeline(planning_result["lastnode"],planning_result["preloading"],planning_result["projectid"])
-            print(planning_result_pipeline)
-            result001=query_workflow_id(planning_result_pipeline["possible_pipeline"][0])
-            print(result001)
+            if planning_result["lastnode"] is not None and planning_result["lastnode"] != [] and any(node.strip() for node in planning_result["lastnode"]):
+                print(planning_result["lastnode"][0])
+                planning_result_pipeline = get_possible_pipeline(planning_result["lastnode"],planning_result["preloading"],planning_result["projectid"])
+                print(planning_result_pipeline)
+                result001=query_workflow_id(planning_result_pipeline["possible_pipeline"][0])
+                print(result001)
+                planning_result["pipleline"]=result001
+            else:
+                planning_result["pipleline"]=["没有找到可用的pipline"]
         except Exception as e:
             logger.error(f"生成pipline失败: {e}")
             raise HTTPException(
