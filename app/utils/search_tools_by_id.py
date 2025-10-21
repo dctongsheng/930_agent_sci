@@ -25,7 +25,7 @@ def query_workflow_id(workflow_ids: List[str]) -> List[str]:
     cypher_query = """
     MATCH (n:Tools) 
     WHERE n.workflow_id IN $workflow_ids
-    RETURN n.name
+    RETURN n
     """
     
     payload = {
@@ -42,10 +42,12 @@ def query_workflow_id(workflow_ids: List[str]) -> List[str]:
     try:
         response = requests.post(url, headers=headers, json=payload)
         print(f"响应状态码: {response.status_code}")
-        print(f"响应内容: {response.text}")
+        # print(len(response.json))
+        # print(f"响应内容: {response.text}")
 
         if response.status_code == 200:
             result = response.json()
+            
 
             # 检查是否有Neo4j错误
             if result.get("errors"):
@@ -54,12 +56,43 @@ def query_workflow_id(workflow_ids: List[str]) -> List[str]:
 
             # 解析所有 name
             results = result.get("results", [])
+            print(len(results))
             if results:
                 data = results[0].get("data", [])
-                names = [row.get("row", [None])[0] for row in data if row.get("row") and row.get("row")[0] is not None]
-                if names:
-                    print(f"找到 {len(names)} 个 name: {names}")
-                    return names
+                print(len(data))
+                res=[]
+                # previous_step_=data[0]
+                for row in data:
+                    step_num=1
+                    row =  row.get("row")
+                    if row:
+                        resu={}
+                        resu["title"]=row[0]["name"]
+                        resu["tools"]=""
+                        resu["step"]=step_num
+                        resu["name"]=row[0]["name"]
+                        resu["description"]=row[0]["summary_short"]
+                        resu["oid"]=row[0]["workflow_id"]
+                        resu["input"]=row[0]["input_files"]
+                        resu["output"]=row[0]["output_files"]
+                        resu["raw_input_params"]=row[0]["inputs"]
+                        resu["raw_output_params"]=row[0]["outputs"]
+                        resu["play_type"]="wdl"
+                        resu["previous_step"]=""
+
+                        res.append(resu)
+                    step_num+=1
+
+
+                    # print(i)
+
+
+
+
+
+                if res:
+                    print(f"找到 {len(res)} 个 name")
+                    return res
             
             print(f"未找到匹配的记录 - workflow_ids: {workflow_ids}")
             return []
@@ -72,5 +105,6 @@ def query_workflow_id(workflow_ids: List[str]) -> List[str]:
         print(f"请求异常: {e}")
         return []
 if __name__ == "__main__":
-    workflow_ids = ["67c10f2ae99e8ef1529cfc94"]
-    print(query_workflow_id(workflow_ids))
+    workflow_ids = ["67c10f2ae99e8ef1529cfc94","68b67fbd5f643ebd3507486d"]
+    aaa=query_workflow_id(workflow_ids)
+    print(aaa)

@@ -97,6 +97,26 @@ async def get_filled_parametersv2(data_choose: Dict[str, Any], query_template: s
     except Exception as e:
         print(f"调用失败: {e}")
         raise
+async def get_filled_parametersv3(data_choose: Dict[str, Any],xtoken:str, query_template: str, user: str, conversation_id: str, response_mode: str) -> Dict[str, Any]:
+    api_key = "app-FHbyTEC54YrNyhfy2CcYPB1v"
+    try:
+        # 调用异步API
+        result = await chat_with_api(
+            api_key=api_key,
+            inputs={"data_choose": data_choose,"xtoken":xtoken}, 
+            query=json.dumps(query_template)
+        )
+        # print("响应结果:", json.dumps(result, indent=2, ensure_ascii=False))
+        # print(result)
+
+        answer = result.get("answer", "")
+        # print(answer)
+        # print(type(answer))
+        return json.loads(answer)
+        
+    except Exception as e:
+        print(f"调用失败: {e}")
+        raise
     
 async def plan_generate(data_choose: Dict[str, Any], query: str) -> Dict[str, Any]:
     api_key = "app-N0lRKtbotLOpa4DCZrboNdhg" 
@@ -163,6 +183,29 @@ async def pipline_generate(data_choose: Dict[str, Any], query: str, conversation
         print(f"调用失败: {e}")
         raise
 
+async def multi_chat_agent(data_choose: Dict[str, Any], query: str, conversation_id: str="",xtoken:str="",state:int=1) -> Dict[str, Any]:
+    api_key = "app-uVNldEKB5oSGxOAGqjTswgDb" 
+    try:
+        # 调用异步API
+        result = await chat_with_api(
+            api_key=api_key,
+            inputs={"data_choose": data_choose,"xtoken":xtoken,"state":state}, 
+            query=query,
+            conversation_id=conversation_id
+        )
+        # print("响应结果:", json.dumps(result, indent=2, ensure_ascii=False))
+        # print(result)
+
+        answer = result.get("answer", "")
+        print(answer)
+        # print(type(answer))
+        return json.loads(answer)
+        
+    except Exception as e:
+        print(f"调用失败: {e}")
+        raise
+
+
 
 # 使用示例
 async def test_auto_fill_parameters():
@@ -211,5 +254,7 @@ if __name__ == "__main__":
     # asyncio.run(test_auto_fill_parameters())
     # asyncio.run(test_plan_generate())
     # asyncio.run(test_auto_fill_parametersv2())
-    asyncio.run(test_multi_chat_with_api())
+    # asyncio.run(test_multi_chat_with_api())
     # asyncio.run(test_pipline_generate())
+
+    asyncio.run(test_pipline_generate())

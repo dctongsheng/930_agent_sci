@@ -358,6 +358,176 @@ async def main_request(arg1:dict,file_path:dict) -> dict:
 
     return {"result":final_result_list}
 
+# 新的参数自动填写接口
+
+def output_node_info_v3(dify_result):
+    # print("dify_result:",dify_result)
+    n=1
+    final_result_list=[] 
+
+    for i in dify_result:
+        # print("i:",i)
+        # print("i['model_id']:",i["model_id"])
+        print(i["plan_type"])
+
+        i_dict={}
+        is_app=True
+        i_dict["title"]=i["title"]
+        i_dict["tools"]=i["tools"]
+        i_dict["step"]=n
+        try:
+            # i["model_id"]=int(i["model_id"])
+            # get_node_dependon="MATCH (n {model_id: %d}) RETURN n" % i["model_id"]
+            # # print("get_node_dependon:",get_node_dependon)
+            # res_dependon=neo4j_query(get_node_dependon)
+            # print("res_dependon:",res_dependon)
+            i_dict["previous_step"]=i["previous_step"]
+            # print("i_dict['previous_step']:",i_dict["previous_step"])
+            if i["tools"] != "" and i["tools"] != None:
+                is_app=False
+        except Exception as e:
+            print("e:",e)
+            i_dict["previous_step"]=""
+            is_app=False
+        if i["plan_type"]=="ai":
+            is_app=False      
+        print(is_app)
+        if is_app:
+            # get_node_by_contain_relationship="MATCH (n {model_id: %d})-[:contain]->(other) RETURN other LIMIT 1" % i["model_id"]
+            # get_node_by_contain_relationship="MATCH (n {name: '%s'}) RETURN n" % i["name"]
+            # print("get_node_by_contain_relationship:",get_node_by_contain_relationship)
+            app_nodes=[i]
+            # print("app_nodes:",app_nodes)
+            # try:
+            #     app_nodes=app_nodes["results"][0]["data"][0]["row"]
+            # except Exception as e:
+            #     print("e:",e)
+            #     app_nodes=app_nodes["results"][0]["data"]
+            # print("app_nodes:",app_nodes)
+            if len(app_nodes) > 0:
+                i_dict["name"]=app_nodes[0]["name"]
+                i_dict["oid"]=app_nodes[0]["oid"]
+                i_dict["description"]=app_nodes[0]["description"]
+                i_dict["input"]=app_nodes[0]["input"]
+                i_dict["output"]=app_nodes[0]["output"]
+                i_dict["plan_type"]="wdl"
+                i_dict["raw_input_params"]=app_nodes[0]["raw_input"]
+                i_dict["raw_output_params"]=app_nodes[0]["raw_output"]
+                final_result_list.append(i_dict)
+    return final_result_list
+async def chuli_raw_planing_v3(raw_params,file_path):
+    user = "abc-123"
+    conversation_id = "1234567890"
+    response_mode = "blocking"
+    process_steps=[]
+    step_depend_on=[]
+    final_result_list=[]
+
+    index_last_step=0
+    data_choose=json.dumps(file_path)
+    data_choose_filter_=get_data_from_auto_fill_params_(data_choose=data_choose)
+
+
+    print(data_choose_filter_)
+
+    sampleid = get_file_sampleid(data_choose_filter_["用户选中的文件："])
+    print("sampleid:",sampleid)
+    
+    for i in raw_params:
+        # print(i)
+        # if i["plan_type"]=="ai":
+        #     # print(i)
+        #     i["name"]=""
+            # print(i)
+        # print(i)
+        if i["step"] == 1:
+            if i["plan_type"] == "wdl":
+                print(i)
+                query_template=parse_parameters_to_defaults(i["raw_input_params"],sampleid=sampleid)
+
+                i["raw_input_params"]=await get_filled_parameters(data_choose=data_choose,query_template=query_template,user=user,conversation_id=conversation_id,response_mode=response_mode)
+                i["raw_output_params"]=replace_values_with_placeholders(i["raw_output_params"])
+                # print("ai自动填写参数input:",i["raw_input_params"])
+                # print("ai自动填写参数output:",i["raw_output_params"])
+            else:
+                print("固定补充")
+                i["raw_output_params"]={"output":"{{{{ai.step1.output}}}}"}
+                # print(data_choose_filter_)
+                i["raw_input_params"]={"input":get_file_path_name(data_choose_filter_["用户选中的文件："])}
+
+
+            if i["previous_step"] not in step_depend_on:
+                step_depend_on.append(i["previous_step"])
+                process_steps.append(i)
+            else:
+                print("触发了并行")
+            final_result_list.append(i)
+        else:
+            # print("i:",i)
+            if i["previous_step"] not in step_depend_on:
+                step_depend_on.append(i["previous_step"])
+                process_steps.append(i)
+                last_step=process_steps[index_last_step]
+                index_last_step=index_last_step+1
+            else:
+                print("触发了并行")
+                index_last_step=index_last_step-1
+                last_step=process_steps[index_last_step]
+            # print("index_last_step:",index_last_step)
+            
+            last_step_output=last_step["raw_output_params"]
+            # print("last_step_output:",last_step_output)
+            # print("i['raw_input_params']:",i["raw_input_params"])
+            input_this_step=parse_parameters_to_defaults(i["raw_input_params"],sampleid=sampleid)
+            if last_step["plan_type"] == "wdl":
+
+                if  i["name"] == "Stereo_Miner_Preprocessing":
+                    
+                    data_choose_filter=get_data_from_auto_fill_params_(data_choose=data_choose)
+                    # print("data_choose_filter:",data_choose_filter)
+                    # print("last_step_output:",last_step_output)
+
+                    last_step_output["data_file_input"]=data_choose_filter["用户选中的文件："]
+                    # print("last_step_output:",last_step_output)
+                    last_step_output=json.dumps(last_step_output)
+                    # last_step_output["data_choose"]=
+                # print("data_choose,",data_choose)
+                else:
+                    last_step_output=json.dumps(last_step_output)
+                # print("last_step_output:",last_step_output)
+                # print("999999999")
+                # print(input_this_step)
+                i["raw_input_params"]=await get_filled_parametersv2(data_choose=last_step_output,query_template=input_this_step,user=user,conversation_id=conversation_id,response_mode=response_mode)
+                i["raw_output_params"]=replace_values_with_placeholders(i["raw_output_params"])
+                # print("ai自动填写参数:",i["raw_input_params"])
+            else:
+                try:
+                    print("AI补充输入，固定补充输出")
+                    i["raw_input_params"]={"input":last_step_output["output"]}
+                    i["raw_output_params"]={"output":"{{{{ai.step{num}.output}}}}".format(num=i["step"])}
+                except Exception as e:
+                    print(e)
+                    print("AI补充输入，固定补充输出")
+                    i["raw_input_params"]={"input":last_step_output}
+                    i["raw_output_params"]={"output":"{{{{ai.step{num}.output}}}}".format(num=i["step"])}
+
+            final_result_list.append(i)
+    # print("step_depend_on:",step_depend_on)
+    return final_result_list
+
+async def main_request_v3(arg1:dict,file_path:dict) -> dict:
+    # print("arg1:",arg1)
+    # try:
+    #     final_result_list=output_node_info_v3(arg1["planning_steps"])
+    #     print(final_result_list)
+    # except Exception as e:
+    #     print(e)
+    print("111")
+    final_result_list=await chuli_raw_planing_v3(arg1["planning_steps"],file_path)
+
+
+    return {"result":final_result_list}
+
 if __name__ == "__main__":
     from example import test_auto_fill_params
     res = asyncio.run(main_request(plan_steps_1,data_test_1))
