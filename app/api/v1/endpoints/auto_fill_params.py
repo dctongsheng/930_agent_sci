@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
 from app.core.logging import get_logger
-from app.schemas.auto_fill_schema import AutoFilledParamsRequest, AutoFilledParamsResponse
+from app.schemas.auto_fill_schema import AutoFilledParamsRequest, AutoFilledParamsResponse,AutoFilledParamsRequestv3
 from app.utils.call_dify import get_filled_parameters
 from app.utils.get_params_v2 import main_request,main_request_v3
 import json
@@ -118,19 +118,17 @@ async def auto_fill_parameters_all_plan_endpoint(request: AutoFilledParamsReques
         )
 
 @router.post("/auto_filled_params_all_plan_v3", response_model=AutoFilledParamsResponse)
-async def auto_fill_parameters_all_plan_endpoint_ve(request: AutoFilledParamsRequest):
+async def auto_fill_parameters_all_plan_endpoint_ve(request: AutoFilledParamsRequestv3):
     """
     自动填写参数接口 - 全计划版本
     基于get_params_v2.py中main函数的逻辑
     """
     logger.info(f"收到全计划参数填写请求")
-    logger.info(request.data_meatinfo)
+    # logger.info(request.data_meatinfo)
     # print(request.data_meatinfo)
-    
     try:
         # 调用main_request函数处理全计划参数填写    
-        result = await main_request_v3(arg1=request.data_meatinfo,file_path=request.query_template)
-
+        result = await main_request_v3(arg1=request.plan_result,file_path=request.json_template)
         print("result:",result)
         logger.info("result:")
         logger.info(result)

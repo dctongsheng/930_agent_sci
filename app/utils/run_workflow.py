@@ -175,7 +175,42 @@ async def error_check(query:dict):
     except Exception as e:
         print(f"工作流执行失败: {e}")
         return -1
+
+async def error_checkv3(query:dict):
+    api_key = "app-dv4UVRIB04NEFc6gKZ4ReSwc"  # 替换为实际的API密钥
+    json_query = json.dumps(query,ensure_ascii=False)
+    print(json_query)
+    try:
+        result = await run_workflow(
+            api_key=api_key,
+            inputs={"logs": json_query},   
+            response_mode="blocking",
+            user="abc-123"
+        )
+        print(json.dumps(result, indent=2, ensure_ascii=False))
+        print(result["data"]["outputs"])
+        return result["data"]["outputs"]
+    except Exception as e:
+        print(f"工作流执行失败: {e}")
+        return -1
     
+async def succes_summary(query:dict):
+    api_key = "app-98SKFUEBQNBY3L5RnlZAitZh"  # 替换为实际的API密钥
+    json_query = json.dumps(query,ensure_ascii=False)
+    print(json_query)
+    try:
+        result = await run_workflow(
+            api_key=api_key,
+            inputs={"logs": json_query},   
+            response_mode="blocking",
+            user="abc-123"
+        )
+        print(json.dumps(result, indent=2, ensure_ascii=False))
+        print(result["data"]["outputs"])
+        return result["data"]["outputs"]
+    except Exception as e:
+        print(f"工作流执行失败: {e}")
+        return -1
 
     
 async def data_check(query:dict):

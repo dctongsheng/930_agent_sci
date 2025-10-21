@@ -90,6 +90,7 @@ if __name__ == "__main__":
         "oid": "67921a81f72d93061c161e1e",
         "input": "[]",
         "output": "[]",
+        "plan_type":"wdl",
         "raw_input": "{'StereoMiner_Clustering_v1.SampleID': 'String', 'StereoMiner_Clustering_v1.h5File': 'File', 'StereoMiner_Clustering_v1.FeatureSelection': 'String (default = \"True\")', 'StereoMiner_Clustering_v1.PcsNumber': 'Int (default = 50)', 'StereoMiner_Clustering_v1.DimensionalReduction': 'String (default = \"UMAP\")', 'StereoMiner_Clustering_v1.UsePcsNumber': 'Int (default = 30)', 'StereoMiner_Clustering_v1.NeighborhoodSize': 'Int (default = 20)', 'StereoMiner_Clustering_v1.ClusteringMethod': 'String (default = \"leiden\")', 'StereoMiner_Clustering_v1.Resolution': 'Float (default = 0.5)', 'StereoMiner_Clustering_v1.ClusteringTool': 'String (default = \"Stereopy\")'}",
         "raw_output": "{'StereoMiner_Clustering_v1.clusterPng': 'File? (optional)', 'StereoMiner_Clustering_v1.clusterPdf': 'File? (optional)', 'StereoMiner_Clustering_v1.cluster_umap': 'File? (optional)', 'StereoMiner_Clustering_v1.cluster_umap_pdf': 'File? (optional)', 'StereoMiner_Clustering_v1.cluster_anndata': 'File? (optional)', 'StereoMiner_Clustering_v1.find_marker_genes': 'File? (optional)', 'StereoMiner_Clustering_v1.marker_gene_heatmap': 'File? (optional)', 'StereoMiner_Clustering_v1.marker_gene_heatmap_pdf': 'File? (optional)'}"
       }

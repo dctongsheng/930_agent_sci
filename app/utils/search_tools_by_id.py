@@ -77,7 +77,7 @@ def query_workflow_id(workflow_ids: List[str]) -> List[str]:
                         resu["output"]=row[0]["output_files"]
                         resu["raw_input_params"]=row[0]["inputs"]
                         resu["raw_output_params"]=row[0]["outputs"]
-                        resu["play_type"]="wdl"
+                        resu["plan_type"]="wdl"
                         resu["previous_step"]=""
 
                         res.append(resu)
