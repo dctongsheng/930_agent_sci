@@ -141,13 +141,13 @@ async def multi_chat_with_api(data_choose: Dict[str, Any], query: str, conversat
         print(f"调用失败: {e}")
         raise
 
-async def pipline_generate(data_choose: Dict[str, Any], query: str, conversation_id: str="",xtoken:str="") -> Dict[str, Any]:
+async def pipline_generate(data_choose: Dict[str, Any], query: str, conversation_id: str="",xtoken:str="",state:int=1) -> Dict[str, Any]:
     api_key = "app-nVpFTNeXiLGMlbPwegevFYnV" 
     try:
         # 调用异步API
         result = await chat_with_api(
             api_key=api_key,
-            inputs={"data_choose": data_choose,"xtoken":xtoken}, 
+            inputs={"data_choose": data_choose,"xtoken":xtoken,"state":state}, 
             query=query,
             conversation_id=conversation_id
         )

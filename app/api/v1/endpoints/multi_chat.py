@@ -17,6 +17,7 @@ class MultiChatRequest(BaseModel):
     query_template: str
     conversation_id: str    
     xtoken: str
+    state: int=1
     need_plan: bool=False
 
 class MultiChatResponse(BaseModel):
@@ -81,27 +82,36 @@ async def pipline_generate_endpoint(request: MultiChatRequest):
     conversation_id=request.conversation_id
     need_plan=request.need_plan
     xtoken=request.xtoken
+    state=request.state
     need_plan=True
     try:
-        planning_result = await pipline_generate(json.dumps(data_choose),query_template,conversation_id,xtoken)
+        planning_result = await pipline_generate(json.dumps(data_choose),query_template,conversation_id,xtoken,state)
         logger.info(f"planning_result: {planning_result}")
+        print(planning_result)
 
-        try:
-            if planning_result["lastnode"] is not None and planning_result["lastnode"] != [] and any(node.strip() for node in planning_result["lastnode"]):
-                print(planning_result["lastnode"][0])
-                planning_result_pipeline = get_possible_pipeline(planning_result["lastnode"],planning_result["preloading"],planning_result["projectid"])
-                print(planning_result_pipeline)
-                result001=query_workflow_id(planning_result_pipeline["possible_pipeline"][0])
-                print(result001)
-                planning_result["pipleline"]=result001
-            else:
-                planning_result["pipleline"]=["没有找到可用的pipline"]
-        except Exception as e:
-            logger.error(f"生成pipline失败: {e}")
-            raise HTTPException(
-                status_code=500,
-                detail=f"Internal server error: {str(e)}"
+        if planning_result["mul_chat"]:
+            return MultiChatResponse(
+                code=200,
+                message="Success",
+                planning_result=planning_result
             )
+        else:
+            try:
+                if planning_result["lastnode"] is not None and planning_result["lastnode"] != [] and any(node.strip() for node in planning_result["lastnode"]):
+                    print(planning_result["lastnode"][0])
+                    planning_result_pipeline = get_possible_pipeline(planning_result["lastnode"],planning_result["preloading"],planning_result["projectid"])
+                    print(planning_result_pipeline)
+                    result001=query_workflow_id(planning_result_pipeline["possible_pipeline"][0])
+                    print(result001)
+                    planning_result["pipleline"]=result001
+                else:
+                    planning_result["pipleline"]=["没有找到可用的pipline"]
+            except Exception as e:
+                logger.error(f"生成pipline失败: {e}")
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"Internal server error: {str(e)}"
+                )
         
         if planning_result is None:
             raise HTTPException(
@@ -113,8 +123,6 @@ async def pipline_generate_endpoint(request: MultiChatRequest):
             message="Success",
             planning_result=planning_result
         )
-    except HTTPException:
-        raise
     except Exception as e:
         logger.error(f"生成pipline失败: {e}")
         raise HTTPException(
