@@ -79,10 +79,8 @@ async def pipline_generate_endpoint(request: MultiChatRequest):
     data_choose=request.data_choose
     query_template=request.query_template
     conversation_id=request.conversation_id
-    need_plan=request.need_plan
     xtoken=request.xtoken
     state=request.state
-    need_plan=True
     try:
         planning_result = await pipline_generate(json.dumps(data_choose),query_template,conversation_id,xtoken,state)
         logger.info(f"planning_result: {planning_result}")
@@ -164,6 +162,77 @@ async def multi_chat_agent_endpoint(request: MultiChatRequest):
                         result001=query_workflow_id(planning_result_pipeline["possible_pipeline"][0])
                         print(result001)
                         planning_result["planning_steps"]=result001
+                        planning_result["text"]="已经根据你的需求为你生成的pipleline如下："
+                    except Exception as e:
+                        planning_result["planning_steps"]={
+                                    "text": "对不起，数据库中没有找到合适的app",
+                                    "conversation_id": planning_result["conversation_id"],
+                                    "mul_chat": True}
+                else:
+                    planning_result["planning_steps"]={
+                                                        "text": "对不起，数据库中没有找到合适的app",
+                                                        "conversation_id": planning_result["conversation_id"],
+                                                        "mul_chat": True}
+            except Exception as e:
+                logger.error(f"生成pipline失败: {e}")
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"Internal server error: {str(e)}"
+                )
+        
+        if planning_result is None:
+            raise HTTPException(
+                status_code=500,
+                detail="生成pipline失败"
+            )
+        return MultiChatResponse(
+            code=200,
+            message="Success",
+            planning_result=planning_result
+        )
+    except Exception as e:
+        logger.error(f"生成pipline失败: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Internal server error: {str(e)}"
+        )
+
+@router.post("/multi_chat_agent_test", response_model=MultiChatResponse)
+async def multi_chat_agent_endpoint(request: MultiChatRequest):
+    """
+    生成pipline接口
+    """
+    logger.info(f"收到生成pipline请求")
+    data_choose=request.data_choose
+    query_template=request.query_template
+    conversation_id=request.conversation_id
+    # need_plan=request.need_plan
+    xtoken=request.xtoken
+    state=request.state
+    # need_plan=True
+    print(query_template)
+    try:
+        planning_result = await pipline_generate(json.dumps(data_choose),query_template,conversation_id,xtoken,state)
+        logger.info(f"planning_result: {planning_result}")
+        print(planning_result)
+
+        if planning_result["mul_chat"]:
+            return MultiChatResponse(
+                code=200,
+                message="Success",
+                planning_result=planning_result
+            )
+        else:
+            try:
+                if planning_result["lastnode"] is not None and planning_result["lastnode"] != [] and any(node.strip() for node in planning_result["lastnode"]):
+                    print(planning_result["lastnode"][0])
+                    planning_result_pipeline = get_possible_pipeline(planning_result["lastnode"],planning_result["preloading"],planning_result["projectid"])
+                    print(planning_result_pipeline)
+                    try:
+                        result001=query_workflow_id(planning_result_pipeline["possible_pipeline"][0])
+                        print(result001)
+                        planning_result["planning_steps"]=result001
+                        planning_result["text"]="已经根据你的需求为你生成的pipleline如下："
                     except Exception as e:
                         planning_result["planning_steps"]={
                                     "text": "对不起，数据库中没有找到合适的app",

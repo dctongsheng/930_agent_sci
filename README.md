@@ -1,6 +1,6 @@
-# FastAPI 意图识别后端项目
+# memoryme 智能代理后端项目
 
-这是一个基于FastAPI构建的模块化后端项目，以意图识别为例展示了完整的项目架构。
+这是一个基于FastAPI构建的智能代理后端项目，专注于生物信息学分析流程的自动化和智能对话。
 
 ## 项目结构
 
@@ -15,7 +15,10 @@ app/
 │       ├── api.py         # API路由聚合
 │       └── endpoints/     # API端点
 │           ├── __init__.py
-│           └── intent.py  # 意图识别端点
+│           ├── multi_chat.py          # 多轮对话接口
+│           ├── auto_fill_params.py    # 参数自动填写接口
+│           ├── error_checked.py       # 错误检查接口
+│           └── query_gpaph_api.py     # 工具替换接口
 ├── core/                   # 核心配置
 │   ├── __init__.py
 │   ├── config.py          # 配置管理
@@ -25,12 +28,19 @@ app/
 │   └── intent_model.py    # 意图识别模型
 ├── schemas/                # 数据模型
 │   ├── __init__.py
-│   └── intent.py          # 意图识别数据模型
+│   ├── intent.py          # 意图识别数据模型
+│   └── auto_fill_schema.py # 参数自动填写数据模型
 ├── services/               # 业务逻辑层
 │   ├── __init__.py
 │   └── intent_service.py  # 意图识别服务
 ├── utils/                  # 工具类
 │   ├── __init__.py
+│   ├── call_dify.py       # Dify API调用
+│   ├── get_params_v2.py   # 参数获取工具
+│   ├── get_params_v3.py   # 参数获取工具v3
+│   ├── run_workflow.py    # 工作流运行工具
+│   ├── query_graph.py     # 图查询工具
+│   ├── replace_tools.py   # 工具替换工具
 │   ├── text_processor.py  # 文本处理工具
 │   └── validators.py      # 数据验证工具
 └── middleware/             # 中间件
@@ -40,9 +50,11 @@ app/
 
 ## 功能特性
 
-- **模块化架构**: 清晰的分层结构，便于维护和扩展
-- **意图识别**: 支持多种意图类型的识别（天气查询、时间查询、问候等）
-- **意图检测**: 专门用于判断查询是否与生物信息学分析相关
+- **智能对话**: 支持多轮在线对话，理解用户意图
+- **参数自动填写**: 基于用户输入自动填充分析参数
+- **错误检查**: 智能检测和总结运行错误
+- **成功总结**: 分析运行成功的结果
+- **工具替换**: 动态替换和优化分析工具
 - **日志系统**: 完整的日志记录，支持文件和控制台输出
 - **数据验证**: 严格的输入数据验证和清理
 - **错误处理**: 统一的错误处理和响应格式
@@ -51,6 +63,14 @@ app/
 ## 安装和运行
 
 ### 1. 安装依赖
+
+使用uv包管理器安装依赖：
+
+```bash
+uv sync
+```
+
+或者使用pip安装：
 
 ```bash
 pip install -r requirements.txt
@@ -68,22 +88,24 @@ cp env.example .env
 
 ### 3. 运行应用
 
+使用uv运行应用：
+
 ```bash
-python run.py
+uv run run.py
 ```
 
 或者使用uvicorn直接运行：
 
 ```bash
-uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+uvicorn app.main:app --host 0.0.0.0 --port 10103 --reload
 ```
 
 ### 4. 访问API文档
 
 启动后访问以下地址查看API文档：
 
-- Swagger UI: http://localhost:8000/docs
-- ReDoc: http://localhost:8000/redoc
+- Swagger UI: http://10.224.28.80:10103/docs
+- ReDoc: http://10.224.28.80:10103/redoc
 
 ### 5. 运行测试
 
@@ -91,78 +113,32 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 # 运行完整API测试
 python test_api.py
 
+# 运行参数自动填写测试
+python test_auto_fill_params.py
+
 # 运行意图检测专项测试
 python test_intent_detection.py
-
-# 运行演示脚本
-python demo_intent_detection.py
 ```
 
 ## API接口
 
-### 意图识别
+### 1. 对话接口
 
-#### 单个意图识别
+#### 多轮对话代理
 
 ```http
-POST /api/v1/intent/recognize
+POST /api/v1/multi_chat/multi_chat_agent_prd
 Content-Type: application/json
 
 {
-    "text": "我想查询今天的天气",
-    "user_id": "user123",
-    "session_id": "session456"
-}
-```
-
-响应示例：
-
-```json
-{
-    "text": "我想查询今天的天气",
-    "intent": "weather_query",
-    "confidence": 0.95,
-    "all_intents": [
-        {"intent": "weather_query", "confidence": 0.95},
-        {"intent": "general_query", "confidence": 0.03},
-        {"intent": "unknown", "confidence": 0.02}
-    ],
-    "entities": {
-        "time": "今天",
-        "query_type": "天气"
+    "data_choose": {
+        "project_id": "project123",
+        "data_info": {...}
     },
-    "processing_time": 150.5,
-    "timestamp": "2024-01-01T12:00:00"
-}
-```
-
-#### 获取可用意图列表
-
-```http
-GET /api/v1/intent/intents
-```
-
-#### 批量意图识别
-
-```http
-POST /api/v1/intent/batch
-Content-Type: application/json
-
-[
-    {"text": "今天天气怎么样"},
-    {"text": "你好"},
-    {"text": "现在几点了"}
-]
-```
-
-#### 意图检测（生物信息学相关）
-
-```http
-POST /api/v1/intent/intent_detection
-Content-Type: application/json
-
-{
-    "query": "富集分析"
+    "query_template": "我想进行富集分析",
+    "conversation_id": "conv_456",
+    "xtoken": "your_token_here",
+    "state": 1
 }
 ```
 
@@ -172,25 +148,154 @@ Content-Type: application/json
 {
     "code": 200,
     "message": "Success",
-    "intent": 1,
-    "is_bioinformatics_related": true
+    "planning_result": {
+        "mul_chat": true,
+        "text": "我理解您想进行富集分析...",
+        "conversation_id": "conv_456",
+        "planning_steps": [...]
+    }
 }
 ```
 
-**意图分类说明：**
-- `intent: 1` - 标准生物信息学分析相关
-- `intent: 0` - 非生物信息学相关
-- `intent: 2` - 高级生物信息学分析相关
+### 2. 参数自动填写接口
 
-## 支持的意图类型
+#### 全计划参数自动填写
 
-- `weather_query`: 天气查询
-- `time_query`: 时间查询
-- `greeting`: 问候
-- `farewell`: 告别
-- `help_request`: 帮助请求
-- `general_query`: 一般查询
-- `unknown`: 未知意图
+```http
+POST /api/v1/auto_fill_params/auto_filled_params_all_plan_v3
+Content-Type: application/json
+
+{
+    "plan_result": {
+        "workflow_id": "wf_789",
+        "parameters": {...}
+    },
+    "json_template": {
+        "template_id": "tpl_001",
+        "fields": [...]
+    },
+    "xtoken": "your_token_here",
+    "user": "abc-123",
+    "conversation_id": "conv_456",
+    "response_mode": "blocking"
+}
+```
+
+响应示例：
+
+```json
+{
+    "code": 200,
+    "message": "Success",
+    "filled_parameters": {
+        "parameter1": "value1",
+        "parameter2": "value2",
+        "filled_count": 15
+    }
+}
+```
+
+### 3. 运行错误总结接口
+
+#### 错误检查v3
+
+```http
+POST /api/v1/error_checked/error_checkedv3
+Content-Type: application/json
+
+{
+    "info": {
+        "workflow_id": "wf_789",
+        "error_logs": [...],
+        "execution_context": {...}
+    }
+}
+```
+
+响应示例：
+
+```json
+{
+    "code": 200,
+    "message": "Success",
+    "check_result": {
+        "error_summary": "参数配置错误",
+        "error_details": [...],
+        "suggestions": [...],
+        "severity": "high"
+    }
+}
+```
+
+### 4. 运行成功总结接口
+
+#### 成功总结
+
+```http
+POST /api/v1/error_checked/succes_summary
+Content-Type: application/json
+
+{
+    "info": {
+        "workflow_id": "wf_789",
+        "execution_logs": [...],
+        "results": {...}
+    }
+}
+```
+
+响应示例：
+
+```json
+{
+    "code": 200,
+    "message": "Success",
+    "check_result": {
+        "success_summary": "分析成功完成",
+        "result_summary": {...},
+        "performance_metrics": {...}
+    }
+}
+```
+
+### 5. 替换工具接口
+
+#### 工具替换
+
+```http
+POST /api/v1/query_gpaph_api/reolace_tools
+Content-Type: application/json
+
+{
+    "workflow_id": "wf_789"
+}
+```
+
+响应示例：
+
+```json
+{
+    "code": 200,
+    "message": "Success",
+    "result": {
+        "alternative_tools": [...],
+        "replacement_suggestions": [...],
+        "compatibility_matrix": {...}
+    }
+}
+```
+
+## 技术栈
+
+- **FastAPI**: 现代、快速的Web框架
+- **Pydantic**: 数据验证和序列化
+- **Loguru**: 强大的日志库
+- **Uvicorn**: ASGI服务器
+- **Neo4j**: 图数据库
+- **Pandas**: 数据处理库
+- **OpenPyXL**: Excel文件处理
+- **Python 3.13+**: 编程语言
+- **uv**: 现代Python包管理器
 
 ## 日志配置
 
@@ -201,21 +306,24 @@ Content-Type: application/json
 - 不同级别的日志记录
 - 结构化日志格式
 
-日志文件默认保存在 `logs/app.log`。
+日志配置位于 `app/core/logging.py`，日志文件默认保存在 `logs/app.log`。
+
+### 日志级别
+
+- `DEBUG`: 调试信息
+- `INFO`: 一般信息
+- `WARNING`: 警告信息
+- `ERROR`: 错误信息
+- `CRITICAL`: 严重错误
 
 ## 开发说明
-
-### 添加新的意图类型
-
-1. 在 `app/services/intent_service.py` 中的 `available_intents` 列表添加新意图
-2. 在 `_classify_intent` 方法中添加分类规则
-3. 在 `app/models/intent_model.py` 中的 `_rule_based_classification` 方法添加规则
 
 ### 添加新的API端点
 
 1. 在 `app/api/v1/endpoints/` 目录下创建新的端点文件
 2. 在 `app/api/v1/api.py` 中注册新路由
 3. 在 `app/schemas/` 目录下创建相应的数据模型
+4. 在 `app/utils/` 目录下添加业务逻辑处理函数
 
 ### 扩展功能
 
@@ -226,13 +334,34 @@ Content-Type: application/json
 - 添加新的工具类处理通用功能
 - 添加新的中间件处理请求/响应
 
-## 技术栈
+### 环境配置
 
-- **FastAPI**: 现代、快速的Web框架
-- **Pydantic**: 数据验证和序列化
-- **Loguru**: 强大的日志库
-- **Uvicorn**: ASGI服务器
-- **Python 3.8+**: 编程语言
+项目支持通过环境变量进行配置：
+
+- `PROJECT_NAME`: 项目名称
+- `HOST`: 服务器主机地址
+- `PORT`: 服务器端口
+- `LOG_LEVEL`: 日志级别
+- `DEBUG`: 调试模式
+
+## 维护和部署
+
+### 开发环境
+
+```bash
+# 安装依赖
+uv sync
+
+# 运行开发服务器
+uv run run.py
+```
+
+### 生产环境
+
+```bash
+# 使用uvicorn直接运行
+uvicorn app.main:app --host 0.0.0.0 --port 10103 --workers 4
+```
 
 ## 许可证
 
