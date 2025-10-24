@@ -140,7 +140,13 @@ async def auto_fill_parameters_all_plan_endpoint_ve(request: AutoFilledParamsReq
         )
     except Exception as e:
         logger.error(f"全计划参数填写失败: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Internal server error: {str(e)}"
+        return AutoFilledParamsResponse(
+            code=400,
+            message="请求失败",
+            filled_parameters= {"error":f"Internal server error: {str(e)}"}
         )
+
+        # raise HTTPException(
+        #     status_code=500,
+        #     detail=f"Internal server error: {str(e)}"
+        # )

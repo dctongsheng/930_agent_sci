@@ -75,10 +75,16 @@ async def succes_summary_endpoint(request: ErrorCheckRequest):
         raise
     except Exception as e:
         logger.error(f"错误检查失败: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Internal server error: {str(e)}"
+        return ErrorCheckResponse(
+            code=400,
+            message="请求失败",
+            check_result={"error":f"Internal server error: {str(e)}"}
         )
+
+        # raise HTTPException(
+        #     status_code=500,
+        #     detail=f"Internal server error: {str(e)}"
+        # )
 
 
 @router.post("/error_checkedv3", response_model=ErrorCheckResponse)
@@ -108,7 +114,12 @@ async def error_checkv3_endpoint(request: ErrorCheckRequest):
         raise
     except Exception as e:
         logger.error(f"错误检查失败: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Internal server error: {str(e)}"
+        return ErrorCheckResponse(
+            code=400,
+            message="请求失败",
+            check_result={"error":f"Internal server error: {str(e)}"}
         )
+        # raise HTTPException(
+        #     status_code=500,
+        #     detail=f"Internal server error: {str(e)}"
+        # )

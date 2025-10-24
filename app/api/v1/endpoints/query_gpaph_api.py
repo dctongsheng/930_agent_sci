@@ -81,5 +81,10 @@ async def reolace_tools_endpoint(request: ReplacetoolsRequest):
         raise
     except Exception as e:
         logger.error(f"可行流水线查询失败: {e}")
-        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+        return PipelineResponse(
+            code=400,
+            message="请求失败",
+            result={"error":f"Internal server error: {str(e)}"}
+        )
+        # raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 

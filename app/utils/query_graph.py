@@ -270,7 +270,7 @@ def get_possible_pipeline(tool_names, preloading, project):
     id2name = dict(zip(all_tool_list['n.workflow_id'], all_tool_list['n.name']))
     
     # core query 
-    cypher = """MATCH p=(m:Tools)-[r*0..7]->(n:Tools) 
+    cypher = """MATCH p=(m:Tools)-[r*0..5]->(n:Tools) 
     WHERE n.name IN $tool
     AND ALL(node IN nodes(p) WHERE 
         node:Tools AND node.workflow_id IN $all_tool_id_list 

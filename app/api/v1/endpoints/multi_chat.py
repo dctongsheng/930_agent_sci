@@ -165,7 +165,7 @@ async def multi_chat_agent_endpoint(request: MultiChatRequest):
                         planning_result["text"]="已经根据你的需求为你生成的pipleline如下："
                     except Exception as e:
                         planning_result["planning_steps"]={
-                                    "text": "对不起，数据库中没有找到合适的app",
+                                    "text": "对不起，您选择的数据和分析任务不符合",
                                     "conversation_id": planning_result["conversation_id"],
                                     "mul_chat": True}
                 else:
@@ -175,16 +175,26 @@ async def multi_chat_agent_endpoint(request: MultiChatRequest):
                                                         "mul_chat": True}
             except Exception as e:
                 logger.error(f"生成pipline失败: {e}")
-                raise HTTPException(
-                    status_code=500,
-                    detail=f"Internal server error: {str(e)}"
+                return MultiChatResponse(
+                code=400,
+                message="生成pipeline流程失败",
+                planning_result={"error":f"抽取工具以及任务模块调用失败：失败原因 {str(e)}"}
                 )
+                # raise HTTPException(
+                #     status_code=500,
+                #     detail=f"Internal server error: {str(e)}"
+                # )
         
         if planning_result is None:
-            raise HTTPException(
-                status_code=500,
-                detail="生成pipline失败"
+            return MultiChatResponse(
+            code=400,
+            message="生成pipeline失败",
+            planning_result={"error":"plan生成的结果为空"}
             )
+            # raise HTTPException(
+            #     status_code=500,
+            #     detail="生成pipline失败"
+            # )
         return MultiChatResponse(
             code=200,
             message="Success",
@@ -192,10 +202,15 @@ async def multi_chat_agent_endpoint(request: MultiChatRequest):
         )
     except Exception as e:
         logger.error(f"生成pipline失败: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Internal server error: {str(e)}"
+        return MultiChatResponse(
+        code=400,
+        message="生成pipeline失败",
+        planning_result={"error":f"调用数据库失败,pre-loading结果为空：失败原因 {str(e)}"}
         )
+        # raise HTTPException(
+        #     status_code=500,
+        #     detail=f"调用数据库失败L：失败原因 {str(e)}"
+        # )
 
 @router.post("/multi_chat_agent_test", response_model=MultiChatResponse)
 async def multi_chat_agent_endpoint(request: MultiChatRequest):
