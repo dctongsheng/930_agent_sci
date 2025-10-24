@@ -63,6 +63,8 @@ async def reolace_tools_endpoint(request: ReplacetoolsRequest):
     基于 `workflow_id` 调用 更多的`workflow_id`。
     """
     logger.info("收到可行流水线查询请求")
+    logger.info(request.workflow_id)
+    print(request.workflow_id)
 
     try:
         result = replace_tools(

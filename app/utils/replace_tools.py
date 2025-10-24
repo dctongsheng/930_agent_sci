@@ -158,7 +158,11 @@ def replace_tools(old_tool_id):
     copied_public_tools = query_cypher(f"""MATCH (n:Tools)-[r:copy_from]->(m:Tools) 
     WHERE n.workflow_id in $all_tool_id_list 
     AND m.workflow_id in $all_tool_id_list
-    return m.workflow_id""", parameters={'all_tool_id_list':all_tool_id_list})['m.workflow_id'].tolist()
+    return m.workflow_id""", parameters={'all_tool_id_list':all_tool_id_list})
+    if copied_public_tools.shape[0] != 0:
+        copied_public_tools = copied_public_tools['m.workflow_id'].tolist()
+    else:
+        copied_public_tools = []
     
     all_tool_list = all_tool_list.loc[~all_tool_list['n.workflow_id'].isin(copied_public_tools)]
     all_tool_id_list = all_tool_list['n.workflow_id'].to_list()
@@ -175,9 +179,10 @@ def replace_tools(old_tool_id):
     result = all_tool_list.sort_values('score', ascending=False).head(10)
     return {x: list(y['n.workflow_id']) for x, y in result.groupby('p.id')}
 
+
 if __name__ == "__main__":
 
 
-    old_tool_id = '68b67fa5c1808feae021d8e6'
+    old_tool_id = '67c7ae2a986ad96d98376585'
     res = replace_tools(old_tool_id)
     print(res)

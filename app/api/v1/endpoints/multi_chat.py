@@ -164,15 +164,19 @@ async def multi_chat_agent_endpoint(request: MultiChatRequest):
                         planning_result["planning_steps"]=result001
                         planning_result["text"]="已经根据你的需求为你生成的pipleline如下："
                     except Exception as e:
-                        planning_result["planning_steps"]={
-                                    "text": "对不起，您选择的数据和分析任务不符合",
-                                    "conversation_id": planning_result["conversation_id"],
-                                    "mul_chat": True}
+                        planning_result["text"]="对不起，您选择的数据和分析任务不符合"
+                        planning_result["mul_chat"]=False
+                        # planning_result["planning_steps"]={
+                        #             "text": "对不起，您选择的数据和分析任务不符合",
+                        #             "conversation_id": planning_result["conversation_id"],
+                        #             "mul_chat": True}
                 else:
-                    planning_result["planning_steps"]={
-                                                        "text": "对不起，数据库中没有找到合适的app",
-                                                        "conversation_id": planning_result["conversation_id"],
-                                                        "mul_chat": True}
+                    planning_result["text"]="对不起，数据库中没有找到合适的app"
+                    planning_result["mul_chat"]=False
+                    # planning_result["planning_steps"]={
+                    #                                     "text": "对不起，数据库中没有找到合适的app",
+                    #                                     "conversation_id": planning_result["conversation_id"],
+                    #                                     "mul_chat": True}
             except Exception as e:
                 logger.error(f"生成pipline失败: {e}")
                 return MultiChatResponse(
