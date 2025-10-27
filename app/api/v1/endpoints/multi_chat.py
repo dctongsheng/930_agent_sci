@@ -156,7 +156,7 @@ async def multi_chat_agent_endpoint(request: MultiChatRequest):
             try:
                 if planning_result["lastnode"] is not None and planning_result["lastnode"] != [] and any(node.strip() for node in planning_result["lastnode"]):
                     print(planning_result["lastnode"][0])
-                    planning_result_pipeline = get_possible_pipeline(planning_result["lastnode"],planning_result["preloading"],planning_result["projectid"])
+                    planning_result_pipeline = get_possible_pipeline(planning_result["lastnode"],planning_result["preloading_result"],planning_result["projectid"])
                     print(planning_result_pipeline)
                     try:
                         result001=query_workflow_id(planning_result_pipeline["possible_pipeline"][0])
@@ -245,7 +245,7 @@ async def multi_chat_agent_endpoint(request: MultiChatRequest):
             try:
                 if planning_result["lastnode"] is not None and planning_result["lastnode"] != [] and any(node.strip() for node in planning_result["lastnode"]):
                     print(planning_result["lastnode"][0])
-                    planning_result_pipeline = get_possible_pipeline(planning_result["lastnode"],planning_result["preloading"],planning_result["projectid"])
+                    planning_result_pipeline = get_possible_pipeline(planning_result["lastnode"],planning_result["preloading_result"],planning_result["projectid"])
                     print(planning_result_pipeline)
                     try:
                         result001=query_workflow_id(planning_result_pipeline["possible_pipeline"][0])
