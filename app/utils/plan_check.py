@@ -174,7 +174,7 @@ def check_matrix_status(status):
         return status
     return ret
 
-def plan_check(pipeline, preloading):
+def plan_check_v3(pipeline, preloading):
     url = "bolt://10.224.28.80:10112"
     auth = ("neo4j", "f012464998")  
     
