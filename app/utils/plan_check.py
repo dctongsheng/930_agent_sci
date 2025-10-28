@@ -191,25 +191,17 @@ def plan_check_v3(pipeline, preloading):
             # print(current_status)
         else:
             return {
-                     "code": 200,
-                     "message": "Success",
-                     "check_result": {
                        "llm_output": {
                          "plan_checkout": "0",
                          "checkout_desc": f"{id2name[x]} 流程需要数据状态{'、'.join(list(set(tools2input[x]) - set(current_status)))},而原始数据与流程均不包含这种状态"
                        }
                      }
-                   }
     return {
-             "code": 200,
-             "message": "Success",
-             "check_result": {
                "llm_output": {
                  "plan_checkout": "1",
                  "checkout_desc": ""
                }
              }
-           }
 
 
 if __name__ == "__main__":
