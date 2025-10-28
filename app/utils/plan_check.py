@@ -225,7 +225,7 @@ if __name__ == "__main__":
             "step": 1,
             "name": "Stereo_Miner_Clustering",
             "description": "该工作流基于标准化表达矩阵，通过降维（如PCA、UMAP）和聚类分析（Leiden或Louvain算法）识别细胞群体及其标记基因。支持使用Stereopy或Spateo工具进行空间转录组数据的聚类分析，并生成标记基因表和可视化结果。主要输出包括聚类图、UMAP图、h5ad格式分析文件及标记基因热图等，用于揭示数据中的细胞异质性与功能特征。推荐参数设置已优化，适用于大规模细胞数据的高效分析。",
-            "oid": "68f74033875b1c5e5b311c7d",
+            "oid": "68ac1e506be1d396807ae1e0",
             "input": "[]",
             "output": "[]",
             "raw_input_params": "{'StereoMiner_Clustering_v1.SampleID': 'String', 'StereoMiner_Clustering_v1.h5File': 'File', 'StereoMiner_Clustering_v1.FeatureSelection': 'String (default = \"True\")', 'StereoMiner_Clustering_v1.PcsNumber': 'Int (default = 50)', 'StereoMiner_Clustering_v1.DimensionalReduction': 'String (default = \"UMAP\")', 'StereoMiner_Clustering_v1.UsePcsNumber': 'Int (default = 30)', 'StereoMiner_Clustering_v1.NeighborhoodSize': 'Int (default = 20)', 'StereoMiner_Clustering_v1.ClusteringMethod': 'String (default = \"leiden\")', 'StereoMiner_Clustering_v1.Resolution': 'Float (default = 0.5)', 'StereoMiner_Clustering_v1.ClusteringTool': 'String (default = \"Stereopy\")'}",
@@ -235,7 +235,7 @@ if __name__ == "__main__":
           }
         ]}
     
-    preloading = ['spatial']
+    preloading = ['gef']
     
-    plan_check(pipeline, preloading)
-    print(plan_check(pipeline, preloading))
+    # plan_check(pipeline, preloading)
+    print(plan_check_v3(pipeline, preloading))

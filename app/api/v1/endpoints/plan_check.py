@@ -61,10 +61,14 @@ async def plan_check_endpoint(request: PlanCheckRequestv3):
     """
     logger.info(f"收到计划检查请求")
     logger.info(request.preloading_result)
+    logger.info(request.plan_desc)
+    print(request.plan_desc,request.preloading_result)
     
     try:
         # 调用计划检查函数
         check_result = plan_check_v3(request.plan_desc,request.preloading_result)
+        print(check_result)
+        logger.info(check_result)
         
         if check_result == -1:
             raise HTTPException(
