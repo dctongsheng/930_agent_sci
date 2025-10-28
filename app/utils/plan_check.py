@@ -140,66 +140,11 @@ def get_input_requirement(tool_names):
     inquired_data_state = query_cypher("""MATCH (m:DataState)-[r:input_requirement]->(n:Tools) WHERE n.workflow_id IN $tool RETURN n.workflow_id, m.name""", parameters={'tool': tool_names}, return_type='list')
     for x in inquired_data_state:
         ret[x.data()['n.workflow_id']].append(x.data()['m.name'])
-    return {x: list(set(y)) for x, y in ret.items() }
-
-
-
-# helper function
-def replace_tools(old_tool_id):
-    project_id = query_cypher(f"MATCH (n:Tools {{workflow_id: '{old_tool_id}'}})-[r:belongs_to]->(m:Project) return m.id", return_type='list')[0].data()['m.id']
-    task = query_cypher(f"MATCH (n:Tools {{workflow_id: '{old_tool_id}'}})-[r:belongs_to]->(m:Task) return m.name", return_type='list')[0].data()['m.name']
-    
-    all_tool_list = query_cypher(f"MATCH (n:Tools)-[r:belongs_to]->(p:Project) WHERE p.id in ['{project_id}', 'Public'] AND (n)-[:belongs_to]->(:Task {{name: '{task}'}}) return n.workflow_id, n.name, n.citation, p.id")
-    all_tool_id_list = all_tool_list['n.workflow_id'].to_list()
-    
-    copied_public_tools = query_cypher(f"""MATCH (n:Tools)-[r:copy_from]->(m:Tools) 
-    WHERE n.workflow_id in $all_tool_id_list 
-    AND m.workflow_id in $all_tool_id_list
-    return m.workflow_id""", parameters={'all_tool_id_list':all_tool_id_list})
-    if copied_public_tools.shape[0] != 0:
-        copied_public_tools = copied_public_tools['m.workflow_id'].tolist()
-    else:
-        copied_public_tools = []
-    
-    all_tool_list = all_tool_list.loc[~all_tool_list['n.workflow_id'].isin(copied_public_tools)]
-    all_tool_id_list = all_tool_list['n.workflow_id'].to_list()
-
-    tools2input = get_input_requirement(all_tool_id_list)
-    for x in all_tool_id_list:
-        if x not in tools2input:
-            tools2input[x] = []
-    all_tool_list['input_requirement'] = [tools2input[x] for x in all_tool_list['n.workflow_id']]
-    all_tool_list = all_tool_list.loc[all_tool_list['n.workflow_id'] != old_tool_id]
-    old_input = tools2input[old_tool_id]
-    all_tool_list['input_similiarity'] = [1 - len(set(x) - set(old_input))/(2*len(set(x))) if len(set(x)) != 0 else 1 for x in all_tool_list['input_requirement']]
-    all_tool_list['score'] = all_tool_list['n.citation'] * all_tool_list['input_similiarity'] 
-    result = all_tool_list.sort_values('score', ascending=False).head(10)
-    return {x: list(y['n.workflow_id']) for x, y in result.groupby('p.id')}
-
-
-## 推荐 工具的接口
-def recommand_tools_from_task(project_id, task):
-    all_tool_list = query_cypher(f"MATCH (n:Tools)-[r:belongs_to]->(p:Project) WHERE p.id in ['{project_id}', 'Public'] AND (n)-[:belongs_to]->(:Task {{name: '{task}'}}) return n.workflow_id, n.name, n.citation, p.id")
-    all_tool_id_list = all_tool_list['n.workflow_id'].to_list()
-    
-    copied_public_tools = query_cypher(f"""MATCH (n:Tools)-[r:copy_from]->(m:Tools) 
-    WHERE n.workflow_id in $all_tool_id_list 
-    AND m.workflow_id in $all_tool_id_list
-    return m.workflow_id""", parameters={'all_tool_id_list':all_tool_id_list})['m.workflow_id'].tolist()
-    
-    all_tool_list = all_tool_list.loc[~all_tool_list['n.workflow_id'].isin(copied_public_tools)]
-    all_tool_id_list = all_tool_list['n.workflow_id'].to_list()
-    all_tool_list['score'] = all_tool_list['n.citation']
-    result = all_tool_list.sort_values('score', ascending=False).head(10)
-    return {x: list(y['n.workflow_id']) for x, y in result.groupby('p.id')}
-
-
-def get_input_requirement(tool_names):
-    ret = defaultdict(list)
-    inquired_data_state = query_cypher("""MATCH (m:DataState)-[r:input_requirement]->(n:Tools) WHERE n.workflow_id IN $tool RETURN n.workflow_id, m.name""", parameters={'tool': tool_names}, return_type='list')
-    for x in inquired_data_state:
-        ret[x.data()['n.workflow_id']].append(x.data()['m.name'])
-    return {x: list(set(y)) for x, y in ret.items() }
+    ret = {x: list(set(y)) for x, y in ret.items() }
+    for x in tool_names:
+        if x not in ret:
+            ret[x] = []
+    return ret
 
 
 def get_output_format(tool_names):
@@ -207,7 +152,11 @@ def get_output_format(tool_names):
     inquired_data_state = query_cypher("""MATCH (n:Tools)-[r:output_format]->(m:DataState) WHERE n.workflow_id IN $tool RETURN n.workflow_id, m.name""", parameters={'tool': tool_names}, return_type='list')
     for x in inquired_data_state:
         ret[x.data()['n.workflow_id']].append(x.data()['m.name'])
-    return {x: list(set(y)) for x, y in ret.items() }
+    ret = {x: list(set(y)) for x, y in ret.items() }
+    for x in tool_names:
+        if x not in ret:
+            ret[x] = []
+    return ret
 
 def get_workflow_name(pipeline_id):
     ret = {}
@@ -225,11 +174,10 @@ def check_matrix_status(status):
         return status
     return ret
 
-
-# 检查流程的接口，需要preloading的结果。
-def plan_check_v3(pipeline, preloading):
+def plan_check(pipeline, preloading):
     url = "bolt://10.224.28.80:10112"
     auth = ("neo4j", "f012464998")  
+    
     config(url, auth=auth)
     pipeline_id = [x['oid'] for x in pipeline['planning_steps']]
     tools2input = get_input_requirement(pipeline_id)
@@ -242,46 +190,52 @@ def plan_check_v3(pipeline, preloading):
             current_status = check_matrix_status(set(current_status) | set(tools2output[x]))
             # print(current_status)
         else:
-            return {"llm_output": {
+            return {
+                     "code": 200,
+                     "message": "Success",
+                     "check_result": {
+                       "llm_output": {
                          "plan_checkout": "0",
                          "checkout_desc": f"{id2name[x]} 流程需要数据状态{'、'.join(list(set(tools2input[x]) - set(current_status)))},而原始数据与流程均不包含这种状态"
                        }
                      }
-    return { "llm_output": {
+                   }
+    return {
+             "code": 200,
+             "message": "Success",
+             "check_result": {
+               "llm_output": {
                  "plan_checkout": "1",
-                 "checkout_desc": ""}
+                 "checkout_desc": ""
+               }
+             }
            }
-    
-
 
 
 if __name__ == "__main__":
     url = "bolt://10.224.28.80:10112"
     auth = ("neo4j", "f012464998")  
+    
     config(url, auth=auth)
-
-    # 推荐 工具的接口
-    project_id = 'P20250228091931671'
-    task = 'Annotation'
-    recommand_tools_from_task(project_id, task)
-
+    
     pipeline = {"planning_steps": [
-      {
-        "title": "Stereo_Miner_Clustering",
-        "tools": "",
-        "step": 1,
-        "name": "Stereo_Miner_Clustering",
-        "description": "该工作流基于标准化表达矩阵，通过降维（如PCA、UMAP）和聚类分析（Leiden或Louvain算法）识别细胞群体及其标记基因。支持使用Stereopy或Spateo工具进行空间转录组数据的聚类分析，并生成标记基因表和可视化结果。主要输出包括聚类图、UMAP图、h5ad格式分析文件及标记基因热图等，用于揭示数据中的细胞异质性与功能特征。推荐参数设置已优化，适用于大规模细胞数据的高效分析。",
-        "oid": "68f74033875b1c5e5b311c7d",
-        "input": "[]",
-        "output": "[]",
-        "raw_input_params": "{'StereoMiner_Clustering_v1.SampleID': 'String', 'StereoMiner_Clustering_v1.h5File': 'File', 'StereoMiner_Clustering_v1.FeatureSelection': 'String (default = \"True\")', 'StereoMiner_Clustering_v1.PcsNumber': 'Int (default = 50)', 'StereoMiner_Clustering_v1.DimensionalReduction': 'String (default = \"UMAP\")', 'StereoMiner_Clustering_v1.UsePcsNumber': 'Int (default = 30)', 'StereoMiner_Clustering_v1.NeighborhoodSize': 'Int (default = 20)', 'StereoMiner_Clustering_v1.ClusteringMethod': 'String (default = \"leiden\")', 'StereoMiner_Clustering_v1.Resolution': 'Float (default = 0.5)', 'StereoMiner_Clustering_v1.ClusteringTool': 'String (default = \"Stereopy\")'}",
-        "raw_output_params": "{'StereoMiner_Clustering_v1.clusterPng': 'File? (optional)', 'StereoMiner_Clustering_v1.clusterPdf': 'File? (optional)', 'StereoMiner_Clustering_v1.cluster_umap': 'File? (optional)', 'StereoMiner_Clustering_v1.cluster_umap_pdf': 'File? (optional)', 'StereoMiner_Clustering_v1.cluster_anndata': 'File? (optional)', 'StereoMiner_Clustering_v1.find_marker_genes': 'File? (optional)', 'StereoMiner_Clustering_v1.marker_gene_heatmap': 'File? (optional)', 'StereoMiner_Clustering_v1.marker_gene_heatmap_pdf': 'File? (optional)'}",
-        "plan_type": "wdl",
-        "previous_step": ""
-      }
-    ]}
+          {
+            "title": "Stereo_Miner_Clustering",
+            "tools": "",
+            "step": 1,
+            "name": "Stereo_Miner_Clustering",
+            "description": "该工作流基于标准化表达矩阵，通过降维（如PCA、UMAP）和聚类分析（Leiden或Louvain算法）识别细胞群体及其标记基因。支持使用Stereopy或Spateo工具进行空间转录组数据的聚类分析，并生成标记基因表和可视化结果。主要输出包括聚类图、UMAP图、h5ad格式分析文件及标记基因热图等，用于揭示数据中的细胞异质性与功能特征。推荐参数设置已优化，适用于大规模细胞数据的高效分析。",
+            "oid": "68f74033875b1c5e5b311c7d",
+            "input": "[]",
+            "output": "[]",
+            "raw_input_params": "{'StereoMiner_Clustering_v1.SampleID': 'String', 'StereoMiner_Clustering_v1.h5File': 'File', 'StereoMiner_Clustering_v1.FeatureSelection': 'String (default = \"True\")', 'StereoMiner_Clustering_v1.PcsNumber': 'Int (default = 50)', 'StereoMiner_Clustering_v1.DimensionalReduction': 'String (default = \"UMAP\")', 'StereoMiner_Clustering_v1.UsePcsNumber': 'Int (default = 30)', 'StereoMiner_Clustering_v1.NeighborhoodSize': 'Int (default = 20)', 'StereoMiner_Clustering_v1.ClusteringMethod': 'String (default = \"leiden\")', 'StereoMiner_Clustering_v1.Resolution': 'Float (default = 0.5)', 'StereoMiner_Clustering_v1.ClusteringTool': 'String (default = \"Stereopy\")'}",
+            "raw_output_params": "{'StereoMiner_Clustering_v1.clusterPng': 'File? (optional)', 'StereoMiner_Clustering_v1.clusterPdf': 'File? (optional)', 'StereoMiner_Clustering_v1.cluster_umap': 'File? (optional)', 'StereoMiner_Clustering_v1.cluster_umap_pdf': 'File? (optional)', 'StereoMiner_Clustering_v1.cluster_anndata': 'File? (optional)', 'StereoMiner_Clustering_v1.find_marker_genes': 'File? (optional)', 'StereoMiner_Clustering_v1.marker_gene_heatmap': 'File? (optional)', 'StereoMiner_Clustering_v1.marker_gene_heatmap_pdf': 'File? (optional)'}",
+            "plan_type": "wdl",
+            "previous_step": ""
+          }
+        ]}
+    
     preloading = ['spatial']
-    # 检查流程的接口，需要preloading的结果。
-    res = plan_check_v3(pipeline, preloading)
-    print(res)
+    
+    plan_check(pipeline, preloading)
+    print(plan_check(pipeline, preloading))
