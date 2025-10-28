@@ -60,6 +60,7 @@ async def plan_check_endpoint(request: PlanCheckRequestv3):
     基于plan_desc检查计划的有效性
     """
     logger.info(f"收到计划检查请求")
+    logger.info(request.preloading_result)
     
     try:
         # 调用计划检查函数
