@@ -8,7 +8,7 @@ from app.core.config import settings
 from app.core.logging import get_logger
 
 logger = get_logger(__name__)
-
+print("log start")
 def main():
     """主函数"""
     logger.info("启动FastAPI应用...")
