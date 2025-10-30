@@ -206,7 +206,7 @@ def insert_pipeline(pipe, no_include_tool, tools2input, tools2output, preloading
     for ins_tool in no_include_tool:
         tmp_pipe = []
         for cur_pipe in ret_pipe:
-            for i in range(len(cur_pipe)+1):
+            for i in range(len(cur_pipe)+1)[::-1]:
                 new_pipe = cur_pipe.copy()
                 new_pipe.insert(i, ins_tool)
                 #print(new_pipe)
@@ -350,8 +350,8 @@ def get_possible_pipeline(tool_names, preloading, project):
 if __name__ == "__main__":
 
     
-    tool_names = ['GraphST_Tutorial', 'SpaGCN_Tutorial']
-    preloading = [ "raw", "qc", 'spatial']
+    tool_names = ['Stereo_Miner_Clustering', 'AI_PAGA_Trajectory']
+    preloading = [ "raw", "qc", 'spatial', 'cluster']
     project = 'P20250228091931671'
     
     result = get_possible_pipeline(tool_names, preloading, project)
