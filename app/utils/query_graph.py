@@ -232,7 +232,9 @@ def get_possible_pipeline(tool_names, preloading, project):
     
     config(url, auth=auth)
     # get available tool ids 
-    all_tool_list = query_cypher(f"MATCH (n:Tools)-[r:belongs_to]->(p:Project) WHERE p.id in ['{project}', 'Public'] return n.workflow_id, n.name, n.citation")
+    # all_tool_list = query_cypher(f"MATCH (n:Tools)-[r:belongs_to]->(p:Project) WHERE p.id in ['{project}', 'Public'] return n.workflow_id, n.name, n.citation")
+    all_tool_list = query_cypher(f"MATCH (o:Omics)<-[:belongs_to]-(n:Tools)-[r:belongs_to]->(p:Project) WHERE p.id in ['{project}', 'Public'] AND o.name IN ['scRNA_seq', 'STOmics'] return n.workflow_id, n.name, n.citation")
+    # print(all_tool_list.shape)
     all_tool_id_list = all_tool_list['n.workflow_id'].to_list()
     
     copied_public_tools = query_cypher(f"""MATCH (n:Tools)-[r:copy_from]->(m:Tools) 
@@ -353,4 +355,5 @@ if __name__ == "__main__":
     project = 'P20250228091931671'
     
     result = get_possible_pipeline(tool_names, preloading, project)
+    print(result)
 
