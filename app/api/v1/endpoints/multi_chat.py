@@ -165,7 +165,11 @@ async def multi_chat_agent_endpoint(request: MultiChatRequest):
                             planning_result["planning_steps"]=result001
                             planning_result["text"]="已经根据你的需求为你生成的pipleline如下："
                         else:
-                            planning_result["text"]="对不起，您选择的数据和分析任务不符合,原因是：{require_data_states}".format(str(planning_result_pipeline["require_data_states"]))
+                            # planning_result["text"]="已为您匹配到工具{tols_names}，但是该工具需要数据满足{require_data_states}".format(str(planning_result['lastnode']),str(planning_result_pipeline["require_data_states"]))
+                            planning_result["text"] = "已为您匹配到工具{tools_names}，但是该工具需要数据满足{require_data_states}".format(
+                                                            tools_names=str(planning_result['lastnode']),
+                                                            require_data_states=str(planning_result_pipeline["require_data_states"])
+                                                        )
                             planning_result["mul_chat"]=True                            
                     except Exception as e:
                         planning_result["text"]="对不起，您选择的数据和分析任务不符合"
