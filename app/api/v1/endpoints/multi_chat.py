@@ -159,10 +159,14 @@ async def multi_chat_agent_endpoint(request: MultiChatRequest):
                     planning_result_pipeline = get_possible_pipeline(planning_result["lastnode"],planning_result["preloading_result"],planning_result["projectid"])
                     print(planning_result_pipeline)
                     try:
-                        result001=query_workflow_id(planning_result_pipeline["possible_pipeline"][0])
-                        print(result001)
-                        planning_result["planning_steps"]=result001
-                        planning_result["text"]="已经根据你的需求为你生成的pipleline如下："
+                        if planning_result_pipeline["success"]:
+                            result001=query_workflow_id(planning_result_pipeline["possible_pipeline"][0])
+                            print(result001)
+                            planning_result["planning_steps"]=result001
+                            planning_result["text"]="已经根据你的需求为你生成的pipleline如下："
+                        else:
+                            planning_result["text"]="对不起，您选择的数据和分析任务不符合,原因是：{require_data_states}".format(str(planning_result_pipeline["require_data_states"]))
+                            planning_result["mul_chat"]=True                            
                     except Exception as e:
                         planning_result["text"]="对不起，您选择的数据和分析任务不符合"
                         planning_result["mul_chat"]=True

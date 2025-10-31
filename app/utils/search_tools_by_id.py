@@ -23,9 +23,9 @@ def query_workflow_id(workflow_ids: List[str]) -> List[str]:
     
     # 使用参数化查询，防止注入攻击
     cypher_query = """
-    MATCH (n:Tools) 
+    MATCH (n:Tools)-[belongs_to]->(m:Task) 
     WHERE n.workflow_id IN $workflow_ids
-    RETURN n
+    RETURN n,m.chinese_name
     """
     
     payload = {
@@ -47,6 +47,7 @@ def query_workflow_id(workflow_ids: List[str]) -> List[str]:
 
         if response.status_code == 200:
             result = response.json()
+            # print(result)
             
 
             # 检查是否有Neo4j错误
@@ -62,12 +63,14 @@ def query_workflow_id(workflow_ids: List[str]) -> List[str]:
                 print(len(data))
                 res=[]
                 # previous_step_=data[0]
+                step_num=1
                 for row in data:
-                    step_num=1
+                    
                     row =  row.get("row")
                     if row:
+                        print(row[1])
                         resu={}
-                        resu["title"]=row[0]["name"]
+                        resu["title"]=row[1]
                         resu["tools"]=""
                         resu["step"]=step_num
                         resu["name"]=row[0]["name"]
