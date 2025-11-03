@@ -438,6 +438,8 @@ async def chuli_raw_planing_v3(raw_params,file_path):
     logger.info(raw_params)
     
     for i in raw_params:
+        print("step:",i["step"])
+        # print(i)
         if i["step"] == 1:
             if i["plan_type"] == "wdl":
                 # print(i)
@@ -450,24 +452,9 @@ async def chuli_raw_planing_v3(raw_params,file_path):
                 print("固定补充")
                 i["raw_output_params"]={"output":"{{{{ai.step1.output}}}}"}
                 i["raw_input_params"]={"input":get_file_path_name(data_choose_filter_["用户选中的文件："])}
-            # if i["previous_step"] not in step_depend_on:
-            #     step_depend_on.append(i["previous_step"])
-            #     process_steps.append(i)
-            # else:
-            #     print("触发了并行")
             process_steps.append(i)
             final_result_list.append(i)
         else:
-            # print("i:",i)
-            # if i["previous_step"] not in step_depend_on:
-            #     step_depend_on.append(i["previous_step"])
-            #     process_steps.append(i)
-            #     last_step=process_steps[index_last_step]
-            #     index_last_step=index_last_step+1
-            # else:
-            #     print("触发了并行")
-            #     index_last_step=index_last_step-1
-            #     last_step=process_steps[index_last_step]
             # print("index_last_step:",index_last_step)
             last_step=process_steps[index_last_step]
             last_step_output=last_step["raw_output_params"]
@@ -475,23 +462,7 @@ async def chuli_raw_planing_v3(raw_params,file_path):
             # print("i['raw_input_params']:",i["raw_input_params"])
             input_this_step=parse_parameters_to_defaults(i["raw_input_params"],sampleid=sampleid)
             if last_step["plan_type"] == "wdl":
-
-                if  i["name"] == "Stereo_Miner_Preprocessing":
-                    
-                    data_choose_filter=get_data_from_auto_fill_params_(data_choose=data_choose)
-                    # print("data_choose_filter:",data_choose_filter)
-                    # print("last_step_output:",last_step_output)
-
-                    last_step_output["data_file_input"]=data_choose_filter["用户选中的文件："]
-                    # print("last_step_output:",last_step_output)
-                    last_step_output=json.dumps(last_step_output)
-                    # last_step_output["data_choose"]=
-                # print("data_choose,",data_choose)
-                else:
-                    last_step_output=json.dumps(last_step_output)
-                # print("last_step_output:",last_step_output)
-                # print("999999999")
-                # print(input_this_step)
+                last_step_output=json.dumps(last_step_output)
                 i["raw_input_params"]=await get_filled_parametersv2(data_choose=last_step_output,query_template=input_this_step,user=user,conversation_id=conversation_id,response_mode=response_mode)
                 i["raw_output_params"]=replace_values_with_placeholders(i["raw_output_params"])
                 # print("ai自动填写参数:",i["raw_input_params"])
@@ -505,7 +476,7 @@ async def chuli_raw_planing_v3(raw_params,file_path):
                     print("AI补充输入，固定补充输出")
                     i["raw_input_params"]={"input":last_step_output}
                     i["raw_output_params"]={"output":"{{{{ai.step{num}.output}}}}".format(num=i["step"])}
-
+            process_steps.append(i)
             final_result_list.append(i)
             index_last_step+=1
     # print("step_depend_on:",step_depend_on)
