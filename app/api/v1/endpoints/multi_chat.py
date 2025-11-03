@@ -141,6 +141,7 @@ async def multi_chat_agent_endpoint(request: MultiChatRequest):
     state=request.state
     # need_plan=True
     print(query_template)
+    logger.info(query_template)
     try:
         planning_result = await multi_chat_agent(json.dumps(data_choose),query_template,conversation_id,xtoken,state)
         logger.info(f"planning_result: {planning_result}")

@@ -8,6 +8,7 @@ import networkx as nx
 from neo4j import GraphDatabase
 
 
+
 _driver_instance = None
 
 def config(url, auth=None, encrypted=False):
@@ -350,8 +351,8 @@ def get_possible_pipeline(tool_names, preloading, project):
 if __name__ == "__main__":
 
     
-    tool_names = ['Stereo_Miner_Clustering', 'AI_PAGA_Trajectory']
-    preloading = [ "raw", "qc", 'spatial', 'cluster']
+    tool_names = ['AI_ScanpyLeiden_Clustering']
+    preloading = [ 'gef']
     project = 'P20250228091931671'
     
     result = get_possible_pipeline(tool_names, preloading, project)

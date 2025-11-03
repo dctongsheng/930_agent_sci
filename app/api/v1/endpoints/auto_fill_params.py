@@ -124,7 +124,7 @@ async def auto_fill_parameters_all_plan_endpoint_ve(request: AutoFilledParamsReq
     基于get_params_v2.py中main函数的逻辑
     """
     logger.info(f"收到全计划参数填写请求")
-    # logger.info(request.data_meatinfo)
+    logger.info(request.plan_result)
     # print(request.data_meatinfo)
     try:
         # 调用main_request函数处理全计划参数填写    

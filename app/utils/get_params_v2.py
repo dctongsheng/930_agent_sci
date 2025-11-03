@@ -4,10 +4,12 @@ from app.utils.example import plan_steps_1,plan_steps_2,data_test_1
 from app.utils.call_dify import get_filled_parametersv2,get_filled_parameters
 from app.utils.run_workflow import description_ai_auto_fill
 
-
+from app.core.logging import get_logger
 import re
 
 import ast
+
+logger = get_logger(__name__)
 
 import json
 def get_data_from_auto_fill_params_(data_choose):
@@ -432,49 +434,41 @@ async def chuli_raw_planing_v3(raw_params,file_path):
 
     sampleid = get_file_sampleid(data_choose_filter_["用户选中的文件："])
     print("sampleid:",sampleid)
+    logger.info("整体的plan:")
+    logger.info(raw_params)
     
     for i in raw_params:
-        # print(i)
-        # if i["plan_type"]=="ai":
-        #     # print(i)
-        #     i["name"]=""
-            # print(i)
-        # print(i)
         if i["step"] == 1:
             if i["plan_type"] == "wdl":
-                print(i)
+                # print(i)
                 query_template=parse_parameters_to_defaults(i["raw_input_params"],sampleid=sampleid)
-
+                logger.info(data_choose)
+                logger.info("当前的meta信息:{query_template}",)
                 i["raw_input_params"]=await get_filled_parameters(data_choose=data_choose,query_template=query_template,user=user,conversation_id=conversation_id,response_mode=response_mode)
                 i["raw_output_params"]=replace_values_with_placeholders(i["raw_output_params"])
-                # print("ai自动填写参数input:",i["raw_input_params"])
-                # print("ai自动填写参数output:",i["raw_output_params"])
             else:
                 print("固定补充")
                 i["raw_output_params"]={"output":"{{{{ai.step1.output}}}}"}
-                # print(data_choose_filter_)
                 i["raw_input_params"]={"input":get_file_path_name(data_choose_filter_["用户选中的文件："])}
-
-
-            if i["previous_step"] not in step_depend_on:
-                step_depend_on.append(i["previous_step"])
-                process_steps.append(i)
-            else:
-                print("触发了并行")
+            # if i["previous_step"] not in step_depend_on:
+            #     step_depend_on.append(i["previous_step"])
+            #     process_steps.append(i)
+            # else:
+            #     print("触发了并行")
             final_result_list.append(i)
         else:
             # print("i:",i)
-            if i["previous_step"] not in step_depend_on:
-                step_depend_on.append(i["previous_step"])
-                process_steps.append(i)
-                last_step=process_steps[index_last_step]
-                index_last_step=index_last_step+1
-            else:
-                print("触发了并行")
-                index_last_step=index_last_step-1
-                last_step=process_steps[index_last_step]
+            # if i["previous_step"] not in step_depend_on:
+            #     step_depend_on.append(i["previous_step"])
+            #     process_steps.append(i)
+            #     last_step=process_steps[index_last_step]
+            #     index_last_step=index_last_step+1
+            # else:
+            #     print("触发了并行")
+            #     index_last_step=index_last_step-1
+            #     last_step=process_steps[index_last_step]
             # print("index_last_step:",index_last_step)
-            
+            last_step=process_steps[index_last_step]
             last_step_output=last_step["raw_output_params"]
             # print("last_step_output:",last_step_output)
             # print("i['raw_input_params']:",i["raw_input_params"])
@@ -512,6 +506,7 @@ async def chuli_raw_planing_v3(raw_params,file_path):
                     i["raw_output_params"]={"output":"{{{{ai.step{num}.output}}}}".format(num=i["step"])}
 
             final_result_list.append(i)
+            index_last_step+=1
     # print("step_depend_on:",step_depend_on)
     return final_result_list
 
@@ -523,6 +518,7 @@ async def main_request_v3(arg1:dict,file_path:dict) -> dict:
     # except Exception as e:
     #     print(e)
     print("111")
+    # logger.info("自动填写参数的meat信息":file_path)
     final_result_list=await chuli_raw_planing_v3(arg1["planning_steps"],file_path)
 
 
