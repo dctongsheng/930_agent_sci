@@ -22,10 +22,17 @@ def query_workflow_id(workflow_ids: List[str]) -> List[str]:
     }
     
     # 使用参数化查询，防止注入攻击
-    cypher_query = """
+    # cypher_query = """
+    # MATCH (n:Tools)-[belongs_to]->(m:Task) 
+    # WHERE n.workflow_id IN $workflow_ids
+    # RETURN n,m.chinese_name
+    # """
+
+    cypher_query="""
+    UNWIND $workflow_ids AS wf_id
     MATCH (n:Tools)-[belongs_to]->(m:Task) 
-    WHERE n.workflow_id IN $workflow_ids
-    RETURN n,m.chinese_name
+    WHERE n.workflow_id = wf_id
+    RETURN n, m.chinese_name
     """
     
     payload = {
@@ -84,14 +91,7 @@ def query_workflow_id(workflow_ids: List[str]) -> List[str]:
                         resu["previous_step"]=""
 
                         res.append(resu)
-                    step_num+=1
-
-
-                    # print(i)
-
-
-
-
+                    step_num+=1                   # print(i)
 
                 if res:
                     print(f"找到 {len(res)} 个 name")
@@ -108,6 +108,6 @@ def query_workflow_id(workflow_ids: List[str]) -> List[str]:
         print(f"请求异常: {e}")
         return []
 if __name__ == "__main__":
-    workflow_ids = ["67c10f2ae99e8ef1529cfc94","68b67fbd5f643ebd3507486d"]
+    workflow_ids = ['68f74030f1797d0e723a1000', '6805e8d7a64f2cf0ceacd696', '68f7403b576f6dff2bdc433b']
     aaa=query_workflow_id(workflow_ids)
     print(aaa)
