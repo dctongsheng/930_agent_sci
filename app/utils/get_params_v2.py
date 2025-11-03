@@ -443,7 +443,7 @@ async def chuli_raw_planing_v3(raw_params,file_path):
                 # print(i)
                 query_template=parse_parameters_to_defaults(i["raw_input_params"],sampleid=sampleid)
                 logger.info(data_choose)
-                logger.info("当前的meta信息:{query_template}",)
+                logger.info(f"当前的meta信息:{query_template}",)
                 i["raw_input_params"]=await get_filled_parameters(data_choose=data_choose,query_template=query_template,user=user,conversation_id=conversation_id,response_mode=response_mode)
                 i["raw_output_params"]=replace_values_with_placeholders(i["raw_output_params"])
             else:
@@ -455,6 +455,7 @@ async def chuli_raw_planing_v3(raw_params,file_path):
             #     process_steps.append(i)
             # else:
             #     print("触发了并行")
+            process_steps.append(i)
             final_result_list.append(i)
         else:
             # print("i:",i)
