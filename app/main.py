@@ -11,7 +11,8 @@ setup_logging()
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
-    description="基于FastAPI的模块化后端项目 - SciAgent API"
+    description="基于FastAPI的模块化后端项目 - SciAgent API",
+    root_path="/siflow/cks/ai-infra/wsbi/fastapihouduan/wsbidata/10103"
 )
 
 # 添加日志中间件
